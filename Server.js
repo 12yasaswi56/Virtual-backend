@@ -788,7 +788,7 @@ app.post("/forgot-password", async (req, res) => {
       },
     });
 
-    const resetLink = `http://localhost:3000/reset-password?token=${token}`;
+    const resetLink = `https://virtual-frontend-six.vercel.app//reset-password?token=${token}`;
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
@@ -962,7 +962,7 @@ app.post("/book-slot", async (req, res) => {
         <p><strong>Date:</strong> ${slot.date}</p>
         <p><strong>Time:</strong> ${slot.time}</p>
         <p><strong>Room ID:</strong> ${roomId}</p>
-        <p>You can join the meeting using this <a href="http://your-website.com/room/${roomId}">Room Link</a> once the interview begins.</p>
+        <p>You can join the meeting using this <a href="https://virtual-frontend-six.vercel.app//room/${roomId}">Room Link</a> once the interview begins.</p>
         <p>One day before your interview, you will receive the meeting link again.</p>
         <br/>
         <p>Best Regards,</p>
