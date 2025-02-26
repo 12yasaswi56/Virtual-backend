@@ -844,14 +844,23 @@ app.post("/forgot-password", async (req, res) => {
 });
 
 // 🔄 Reset Password Route
+
 app.post("/Resetpassword", async (req, res) => {
   const { token, newPassword } = req.body;
 
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.id);
+  // Validate input
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: "Token and new password are required." });
+  }
 
-    if (!user) return res.status(400).json({ message: "Invalid token or user does not exist" });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Ensure JWT_SECRET is correctly used
+    console.log("Decoded Token:", decoded); // Debug: Check if the token is correctly decoded
+
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(400).json({ message: "Invalid token or user does not exist" });
+    }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
@@ -859,9 +868,29 @@ app.post("/Resetpassword", async (req, res) => {
 
     res.json({ message: "Password has been reset successfully" });
   } catch (error) {
+    console.error("Error:", error.message); // Log error to debug
     res.status(400).json({ message: "Invalid or expired token" });
   }
 });
+
+// app.post("/Resetpassword", async (req, res) => {
+//   const { token, newPassword } = req.body;
+
+//   try {
+//     const decoded = jwt.verify(token, JWT_SECRET);
+//     const user = await User.findById(decoded.id);
+
+//     if (!user) return res.status(400).json({ message: "Invalid token or user does not exist" });
+
+//     const hashedPassword = await bcrypt.hash(newPassword, 10);
+//     user.password = hashedPassword;
+//     await user.save();
+
+//     res.json({ message: "Password has been reset successfully" });
+//   } catch (error) {
+//     res.status(400).json({ message: "Invalid or expired token" });
+//   }
+// });
 
 
 // app.get("/slots", async (req, res) => {
