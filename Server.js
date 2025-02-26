@@ -57,12 +57,21 @@ const User = mongoose.model("User", userSchema);
 // });
 
 
+// const slotSchema = new mongoose.Schema({
+//   date: String,
+//   startTime: String,
+//   endTime: String,
+//   isBooked: Boolean,
+//   bookedBy: { type: String, default: null },
+// });
+
 const slotSchema = new mongoose.Schema({
-  date: String,
-  startTime: String,
-  endTime: String,
-  isBooked: Boolean,
+  date: { type: String, required: true },
+  startTime: { type: String, required: true },
+  endTime: { type: String, required: true },
+  isBooked: { type: Boolean, default: false },
   bookedBy: { type: String, default: null },
+  roomId: { type: String, default: null }, // ✅ Ensure this exists
 });
 
 
@@ -939,20 +948,42 @@ const transporter = nodemailer.createTransport({
 
 import moment from 'moment' ;// Import moment.js for date comparison
 
+// app.get("/AdminMeetings", async (req, res) => {
+//   try {
+//     const currentDateTime = moment(); // Get the current date and time
+
+//     const meetings = await Slot.find({
+//       isBooked: true,
+//       $or: [
+//         { date: { $gt: currentDateTime.format("YYYY-MM-DD") } }, // Future dates
+//         { 
+//           date: currentDateTime.format("YYYY-MM-DD"), // Same day
+//           endTime: { $gte: currentDateTime.format("HH:mm") } // Check endTime
+//         }
+//       ]
+//     }).select("date time endTime bookedBy roomId");
+
+//     res.json(meetings);
+//   } catch (error) {
+//     console.error("Error fetching meetings:", error);
+//     res.status(500).json({ message: "Failed to fetch meetings" });
+//   }
+// });
+
+
 app.get("/AdminMeetings", async (req, res) => {
   try {
-    const currentDateTime = moment(); // Get the current date and time
-
+    const currentDateTime = moment();
     const meetings = await Slot.find({
       isBooked: true,
       $or: [
-        { date: { $gt: currentDateTime.format("YYYY-MM-DD") } }, // Future dates
+        { date: { $gt: currentDateTime.format("YYYY-MM-DD") } },
         { 
-          date: currentDateTime.format("YYYY-MM-DD"), // Same day
-          endTime: { $gte: currentDateTime.format("HH:mm") } // Check endTime
+          date: currentDateTime.format("YYYY-MM-DD"),
+          endTime: { $gte: currentDateTime.format("HH:mm") }
         }
       ]
-    }).select("date time endTime bookedBy roomId");
+    }).select("date startTime endTime bookedBy roomId"); // ✅ Use startTime instead of time
 
     res.json(meetings);
   } catch (error) {
@@ -960,7 +991,6 @@ app.get("/AdminMeetings", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch meetings" });
   }
 });
-
 
 
 
