@@ -807,7 +807,7 @@ app.post("/forgot-password", async (req, res) => {
       },
     });
 
-    const resetLink = `https://virtual-frontend-six.vercel.app//reset-password?token=${token}`;
+    const resetLink = `https://virtual-frontend-six.vercel.app/reset-password?token=${token}`;
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
