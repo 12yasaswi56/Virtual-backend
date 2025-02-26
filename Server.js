@@ -35,16 +35,34 @@ mongoose
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
 // 📌 User Schema
+// const userSchema = new mongoose.Schema({
+//   firstName: String,
+//   lastName: String,
+//   nationality: String,
+//   email: { type: String, unique: true },
+//   mobile: String,
+//   password: String,
+//   otp: String,
+//   isVerified: { type: Boolean, default: false },
+// });
+
+
 const userSchema = new mongoose.Schema({
   firstName: String,
   lastName: String,
   nationality: String,
-  email: { type: String, unique: true },
+  email: { type: String, unique: true, required: true },
   mobile: String,
   password: String,
   otp: String,
+  otpExpires: Date, // ✅ OTP expiration time
   isVerified: { type: Boolean, default: false },
+
+  // Password Reset Fields
+  passwordResetToken: String,  // ✅ Stores the last used reset token
+  passwordResetExpires: Date,  // ✅ Expiration time for reset token
 });
+
 
 const User = mongoose.model("User", userSchema);
 
@@ -807,7 +825,7 @@ app.post("/forgot-password", async (req, res) => {
       },
     });
 
-    const resetLink = `https://virtual-frontend-six.vercel.app/reset-password?token=${token}`;
+    const resetLink = `https://virtual-frontend-six.vercel.app/Resetpassword?token=${token}`;
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
@@ -826,7 +844,7 @@ app.post("/forgot-password", async (req, res) => {
 });
 
 // 🔄 Reset Password Route
-app.post("/reset-password", async (req, res) => {
+app.post("/Resetpassword", async (req, res) => {
   const { token, newPassword } = req.body;
 
   try {
