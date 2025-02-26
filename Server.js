@@ -34,17 +34,6 @@ mongoose
   .then(() => console.log("✅ MongoDB Atlas Connected Successfully"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
-// 📌 User Schema
-// const userSchema = new mongoose.Schema({
-//   firstName: String,
-//   lastName: String,
-//   nationality: String,
-//   email: { type: String, unique: true },
-//   mobile: String,
-//   password: String,
-//   otp: String,
-//   isVerified: { type: Boolean, default: false },
-// });
 
 
 const userSchema = new mongoose.Schema({
@@ -66,22 +55,7 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", userSchema);
 
-// 📌 Slot Schema
-// const slotSchema = new mongoose.Schema({
-//   date: String,
-//   time: String,
-//   isBooked: { type: Boolean, default: false },
-//   bookedBy: { type: String, default: null },
-// });
 
-
-// const slotSchema = new mongoose.Schema({
-//   date: String,
-//   startTime: String,
-//   endTime: String,
-//   isBooked: Boolean,
-//   bookedBy: { type: String, default: null },
-// });
 
 const slotSchema = new mongoose.Schema({
   date: { type: String, required: true },
@@ -183,35 +157,6 @@ app.get("/startup", async (req, res) => {
 
 
 
-// const mentorSchema = new mongoose.Schema({
-//   name: {
-//     type: String,
-//     required: true,
-//     trim: true,
-//   },
-//   email: {
-//     type: String,
-//     required: true,
-//     unique: true, // Ensure each mentor email is unique
-//     lowercase: true,
-//     trim: true,
-//   },
-//   expertise: {
-//     type: String,
-//     required: true,
-//     trim: true,
-//   },
-//   status: {
-//     type: String,
-//     default: "Pending", // Default status is Pending
-//     enum: ["Pending", "Approved", "Rejected"], // Possible status values
-//   },
-//   appliedAt: {
-//     type: Date,
-//     default: Date.now, // Automatically set the application time
-//   },
-// });
-
 
 const mentorSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
@@ -223,27 +168,6 @@ const mentorSchema = new mongoose.Schema({
 });
 // Create the Mentor model based on the schema
 const Mentor = mongoose.model("Mentor", mentorSchema);
-
-
-// app.post("/mentor-apply", async (req, res) => {
-//   const { name, email, expertise } = req.body;
-
-//   if (!name || !email || !expertise) {
-//     return res.status(400).json({ message: "All fields are required" });
-//   }
-
-//   try {
-//     // Create a new mentor application
-//     const newMentor = new Mentor({ name, email, expertise });
-//     await newMentor.save(); // Save it to the database
-
-//     // Send success response
-//     return res.status(200).json({ message: "Application submitted successfully!" });
-//   } catch (err) {
-//     console.error("Error saving mentor application:", err);
-//     return res.status(500).json({ message: "Server error. Try again later." });
-//   }
-// });
 
 
 // Mentor Application Route
@@ -297,72 +221,6 @@ app.get("/mentor-applications", async (req, res) => {
 
 
 
-// Endpoint to update the status of a mentor application
-// app.put("/update-status", async (req, res) => {
-//   const { email, status } = req.body;  // Get the email and status from the request body
-
-//   // Validate the status
-//   if (!["Approved", "Rejected"].includes(status)) {
-//     return res.status(400).json({ message: "Invalid status. Use 'Approved' or 'Rejected'." });
-//   }
-
-//   try {
-//     // Find the mentor by email and update the status
-//     const mentor = await Mentor.findOneAndUpdate(
-//       { email: email },   // Find mentor by email
-//       { status: status }, // Update the status field
-//       { new: true }       // Return the updated document
-//     );
-
-//     if (!mentor) {
-//       return res.status(404).json({ message: "Mentor not found" });
-//     }
-
-//     // Send success response
-//     res.status(200).json({ message: "Mentor status updated", mentor: mentor });
-//   } catch (err) {
-//     console.error("Error updating mentor status:", err);
-//     res.status(500).json({ message: "Internal Server Error" });
-//   }
-// });
-
-
-// app.put("/update-status", async (req, res) => {
-//   const { email, status } = req.body;
-
-//   try {
-//     const mentor = await Mentor.findOne({ email });
-//     if (!mentor) return res.status(404).json({ message: "Mentor not found" });
-
-//     mentor.status = status;
-//     mentor.isAvailable = status === "Approved"; // Automatically available when approved
-//     await mentor.save();
-
-//     res.json({ message: `Mentor ${status}` });
-//   } catch (error) {
-//     res.status(500).json({ message: "Error updating mentor status" });
-//   }
-// });
-
-// app.put("/update-availability", async (req, res) => {
-//   const { email, isAvailable } = req.body;
-
-//   try {
-//     const mentor = await Mentor.findOne({ email });
-//     if (!mentor) return res.status(404).json({ message: "Mentor not found" });
-
-//     if (mentor.status !== "Approved") {
-//       return res.status(400).json({ message: "Only approved mentors can change availability" });
-//     }
-
-//     mentor.isAvailable = isAvailable;
-//     await mentor.save();
-
-//     res.json({ message: "Availability updated", isAvailable });
-//   } catch (error) {
-//     res.status(500).json({ message: "Error updating availability" });
-//   }
-// });
 
 
 // Update mentor status (Approved, Pending, Rejected)
@@ -460,29 +318,6 @@ const io = new Server(server, {
 });
 
 
-// io.on("connection", (socket) => {
-//   console.log(`User connected: ${socket.id}`);
-
-//   socket.on("join-room", (roomId, userId) => {
-//     console.log(`User ${userId} joined room ${roomId}`);
-//     socket.join(roomId);
-//     socket.broadcast.to(roomId).emit("user-connected", userId);
-
-//     socket.on("disconnect", () => {
-//       console.log(`User ${userId} disconnected from ${roomId}`);
-//       socket.broadcast.to(roomId).emit("user-disconnected", userId);
-//     });
-//   });
-
-//   // socket.on("send-message", ({ roomId, message }) => {
-//   //   socket.broadcast.to(roomId).emit("receive-message", { text: message, sender: "Other" });
-//   // });
-
-//   socket.on("send-message", ({ roomId, message }) => {
-//     io.to(roomId).emit("receive-message", { text: message, sender: socket.id });
-//   });
-  
-// });
 let users={}
 // Handle socket connections
 io.on("connection", (socket) => {
@@ -559,112 +394,7 @@ const Chat = mongoose.model("Chat", ChatSchema);
 
 const userSockets = {}; // { userId: socketId }
 
-// const io = new Server(server, {
-//   cors: {
-//     origin: "*",
-//   },
-// });
 
-// io.on("connection", (socket) => {
-//   console.log("New user connected:", socket.id);
-
-//   // Store user's socket ID
-//   socket.on("registerUser", (userId) => {
-//     userSockets[userId] = socket.id;
-//     console.log(`User ${userId} registered with socket ${socket.id}`);
-//   });
-
-//   // Send & Save Message
-//   socket.on("sendMessage", async ({ sender, receiver, message }) => {
-//     try {
-//       const chatMessage = new Chat({ sender, receiver, message });
-//       await chatMessage.save();
-
-//       // Send message only to the intended receiver
-//       const receiverSocket = userSockets[receiver];
-//       if (receiverSocket) {
-//         io.to(receiverSocket).emit("receiveMessage", chatMessage);
-//       } else {
-//         console.log(`User ${receiver} is offline.`);
-//       }
-//     } catch (error) {
-//       console.error("Error saving message:", error);
-//     }
-//   });
-
-//   // Fetch Chat History when user connects
-//   socket.on("getChatHistory", async ({ sender, receiver }) => {
-//     const messages = await Chat.find({
-//       $or: [
-//         { sender, receiver },
-//         { sender: receiver, receiver: sender },
-//       ],
-//     }).sort({ timestamp: 1 });
-//     socket.emit("chatHistory", messages);
-//   });
-
-//   // Handle Disconnection
-//   socket.on("disconnect", () => {
-//     for (const userId in userSockets) {
-//       if (userSockets[userId] === socket.id) {
-//         delete userSockets[userId];
-//         console.log(`User ${userId} disconnected.`);
-//         break;
-//       }
-//     }
-//   });
-// });
-
-
-
-
-
-
-
-
-
-// Assign a mentor to the user
-// app.post("/assign-mentor", async (req, res) => {
-//   try {
-//     const { user } = req.body;
-//     if (!user) return res.status(400).json({ message: "User is required" });
-
-//     // Find a mentor (modify logic as needed)
-//     const mentor = await Mentor.findOne(); // Assigns first available mentor
-
-//     if (!mentor) {
-//       return res.status(404).json({ message: "No mentors available" });
-//     }
-
-//     return res.status(200).json({ mentor });
-//   } catch (error) {
-//     console.error("Error assigning mentor:", error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
-
-// app.post("/assign-mentor", async (req, res) => {
-//   try {
-//     const { user } = req.body;
-//     if (!user) return res.status(400).json({ message: "User is required" });
-
-//     // Find an available mentor with approved status
-//     const mentor = await Mentor.findOne({ isAvailable: true, status: "Approved" });
-
-//     if (!mentor) {
-//       return res.status(404).json({ message: "No available mentors at the moment" });
-//     }
-
-//     // Update mentor's availability to false after assignment
-//     mentor.isAvailable = false;
-//     await mentor.save();
-
-//     return res.status(200).json({ message: "Mentor assigned successfully", mentor });
-//   } catch (error) {
-//     console.error("Error assigning mentor:", error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
 app.post("/assign-mentor", async (req, res) => {
   try {
     const { user } = req.body;
@@ -684,27 +414,6 @@ app.post("/assign-mentor", async (req, res) => {
   }
 });
 
-
-
-// Fetch chat history between user and mentor
-// app.get("/chats", async (req, res) => {
-//   try {
-//     const { sender, receiver } = req.query;
-//     if (!sender || !receiver) return res.status(400).json({ message: "Invalid parameters" });
-
-//     const messages = await Chat.find({ 
-//       $or: [
-//         { sender, receiver },
-//         { sender: receiver, receiver: sender }
-//       ]
-//     }).sort({ timestamp: 1 });
-
-//     return res.status(200).json(messages);
-//   } catch (error) {
-//     console.error("Error fetching chats:", error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
 
 app.get("/chats", async (req, res) => {
   try {
@@ -753,18 +462,6 @@ io.on("connection", (socket) => {
     console.log("User disconnected:", socket.id);
   });
 });
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -873,77 +570,6 @@ app.post("/Resetpassword", async (req, res) => {
   }
 });
 
-// app.post("/Resetpassword", async (req, res) => {
-//   const { token, newPassword } = req.body;
-
-//   try {
-//     const decoded = jwt.verify(token, JWT_SECRET);
-//     const user = await User.findById(decoded.id);
-
-//     if (!user) return res.status(400).json({ message: "Invalid token or user does not exist" });
-
-//     const hashedPassword = await bcrypt.hash(newPassword, 10);
-//     user.password = hashedPassword;
-//     await user.save();
-
-//     res.json({ message: "Password has been reset successfully" });
-//   } catch (error) {
-//     res.status(400).json({ message: "Invalid or expired token" });
-//   }
-// });
-
-
-// app.get("/slots", async (req, res) => {
-//   try {
-//       const currentDateTime = moment(); // Get current date & time
-//       const currentDate = currentDateTime.format("YYYY-MM-DD");
-//       const currentTime = currentDateTime.format("HH:mm"); // Current time in HH:mm format
-
-//       console.log("Current Date:", currentDate, "| Current Time:", currentTime); // Debugging
-
-//       // Fetch only future or today's upcoming slots
-//       let availableSlots = await Slot.find({
-//           isBooked: false,
-//           $or: [
-//               { date: { $gt: currentDate } }, // Future dates
-//               { date: currentDate, startTime: { $gte: currentTime } } // Today's remaining slots
-//           ]
-//       });
-
-//       // If no slots exist, generate slots for the next 7 days
-//       if (availableSlots.length === 0) {
-//           const timeSlots = ["10:00", "11:30", "14:00", "15:30"]; // Times in 24-hour format
-
-//           const slotsToInsert = [];
-//           for (let i = 0; i < 7; i++) {
-//               const date = moment().add(i, "days").format("YYYY-MM-DD"); // Generate dates for the next 7 days
-              
-//               for (const startTime of timeSlots) {
-//                   const endTime = moment(startTime, "HH:mm").add(1, "hour").format("HH:mm");
-//                   slotsToInsert.push({ date, startTime, endTime, isBooked: false });
-//               }
-//           }
-
-//           // Insert all slots in one go
-//           await Slot.insertMany(slotsToInsert);
-
-//           // Fetch the newly created slots
-//           availableSlots = await Slot.find({
-//               isBooked: false,
-//               $or: [
-//                   { date: { $gt: currentDate } },
-//                   { date: currentDate, startTime: { $gte: currentTime } }
-//               ]
-//           });
-//       }
-
-//       res.json(availableSlots);
-//   } catch (error) {
-//       console.error("Error fetching available slots:", error);
-//       res.status(500).json({ message: "Server Error" });
-//   }
-// });
-
 
 app.get("/slots", async (req, res) => {
   try {
@@ -995,29 +621,6 @@ const transporter = nodemailer.createTransport({
 
 import moment from 'moment' ;// Import moment.js for date comparison
 
-// app.get("/AdminMeetings", async (req, res) => {
-//   try {
-//     const currentDateTime = moment(); // Get the current date and time
-
-//     const meetings = await Slot.find({
-//       isBooked: true,
-//       $or: [
-//         { date: { $gt: currentDateTime.format("YYYY-MM-DD") } }, // Future dates
-//         { 
-//           date: currentDateTime.format("YYYY-MM-DD"), // Same day
-//           endTime: { $gte: currentDateTime.format("HH:mm") } // Check endTime
-//         }
-//       ]
-//     }).select("date time endTime bookedBy roomId");
-
-//     res.json(meetings);
-//   } catch (error) {
-//     console.error("Error fetching meetings:", error);
-//     res.status(500).json({ message: "Failed to fetch meetings" });
-//   }
-// });
-
-
 app.get("/AdminMeetings", async (req, res) => {
   try {
     const currentDateTime = moment();
@@ -1044,65 +647,6 @@ app.get("/AdminMeetings", async (req, res) => {
 
  import { v4 as uuidv4 } from "uuid"; // Correct import syntax
 
-// // app.post("/book-slot", async (req, res) => {
-// //   const { slotId, email } = req.body;
-
-// //   console.log("Received Slot ID:", slotId);
-// //   console.log("Received Email:", email);
-
-// //   if (!slotId || !email) {
-// //     return res.status(400).json({ message: "Slot ID and Email are required" });
-// //   }
-
-// //   try {
-// //     const slot = await Slot.findById(slotId);
-
-// //     console.log("Slot from DB:", slot);
-
-// //     if (!slot) {
-// //       return res.status(404).json({ message: "Slot not found" });
-// //     }
-
-// //     if (slot.isBooked) {
-// //       return res.status(400).json({ message: "Slot already booked" });
-// //     }
-
-// //     // Generate a unique room ID for the meeting
-// //     const roomId = uuidv4();  // Generate the unique room ID
-
-// //     // Update slot booking status
-// //     slot.isBooked = true;
-// //     slot.bookedBy = email;
-// //     slot.roomId = roomId;  // Optionally store the room ID in the slot document
-// //     await slot.save();
-
-// //     // Send confirmation email with Room ID
-// //     const mailOptions = {
-// //       from: process.env.EMAIL_USER,
-// //       to: email,
-// //       subject: "Slot Booking Confirmation ✅",
-// //       html: `
-// //         <h2>Hello,</h2>
-// //         <p>Your interview slot has been <strong>successfully booked!</strong></p>
-// //         <p><strong>Date:</strong> ${slot.date}</p>
-// //         <p><strong>Time:</strong> ${slot.time}</p>
-// //         <p><strong>Room ID:</strong> ${roomId}</p>
-// //         <p>You can join the meeting using this <a href="https://virtual-frontend-six.vercel.app//room/${roomId}">Room Link</a> once the interview begins.</p>
-// //         <p>One day before your interview, you will receive the meeting link again.</p>
-// //         <br/>
-// //         <p>Best Regards,</p>
-// //         <p><strong>H2Vis Incubators</strong></p>
-// //       `,
-// //     };
-
-// //     await transporter.sendMail(mailOptions);
-
-// //     res.json({ message: "Slot booked successfully! Confirmation email sent." });
-// //   } catch (error) {
-// //     console.error("Error booking slot:", error);
-// //     res.status(500).json({ message: "Booking failed" });
-// //   }
-// // });
 
 
 
@@ -1174,150 +718,6 @@ app.post("/book-slot", async (req, res) => {
     res.status(500).json({ message: "Booking failed" });
   }
 });
-
-
-// app.post("/book-slot", async (req, res) => {
-//   const { slotId, email } = req.body;
-
-//   console.log("Received Slot ID:", slotId);
-//   console.log("Received Email:", email);
-
-//   if (!slotId || !email) {
-//     return res.status(400).json({ message: "Slot ID and Email are required" });
-//   }
-
-//   // Validate email format
-//   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//   if (!emailRegex.test(email)) {
-//     return res.status(400).json({ message: "Invalid email format" });
-//   }
-
-//   try {
-//     // Use atomic operation to prevent double booking
-//     const slot = await Slot.findOneAndUpdate(
-//       { _id: slotId, isBooked: false },
-//       { $set: { isBooked: true, bookedBy: email, roomId: uuidv4() } },
-//       { new: true }
-//     );
-
-//     if (!slot) {
-//       return res.status(400).json({ message: "Slot not available or already booked" });
-//     }
-
-//     // Send confirmation email with Room ID
-//     const mailOptions = {
-//       from: process.env.EMAIL_USER,
-//       to: email,
-//       subject: "Slot Booking Confirmation ✅",
-//       html: `
-//         <h2>Hello,</h2>
-//         <p>Your interview slot has been <strong>successfully booked!</strong></p>
-//         <p><strong>Date:</strong> ${slot.date}</p>
-//         <p><strong>Time:</strong> ${slot.startTime} - ${slot.endTime}</p>
-//         <p><strong>Room ID:</strong> ${slot.roomId}</p>
-//         <p>You can join the meeting using this <a href="https://virtual-frontend-six.vercel.app/room/${slot.roomId}">Room Link</a> once the interview begins.</p>
-//         <p>One day before your interview, you will receive the meeting link again.</p>
-//         <br/>
-//         <p>Best Regards,</p>
-//         <p><strong>H2Vis Incubators</strong></p>
-//       `,
-//     };
-
-//     try {
-//       await transporter.sendMail(mailOptions);
-//       console.log("Confirmation email sent to:", email);
-//     } catch (emailError) {
-//       console.error("Failed to send confirmation email:", emailError);
-//       return res.status(500).json({ message: "Slot booked, but email failed to send" });
-//     }
-
-//     res.json({ message: "Slot booked successfully! Confirmation email sent." });
-
-//   } catch (error) {
-//     console.error("Error booking slot:", error);
-//     res.status(500).json({ message: "Booking failed" });
-//   }
-// });
-
-
-
-
-// app.post("/book-slot", async (req, res) => {
-//   const { slotId, email } = req.body;
-
-//   console.log("Received Slot ID:", slotId);
-//   console.log("Received Email:", email);
-
-//   if (!slotId || !email) {
-//     return res.status(400).json({ message: "Slot ID and Email are required" });
-//   }
-
-//   // Validate email format
-//   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//   if (!emailRegex.test(email)) {
-//     return res.status(400).json({ message: "Invalid email format" });
-//   }
-
-//   try {
-//     // Generate Room ID before updating
-//     const roomId = uuidv4();
-//     console.log("Generated Room ID:", roomId);
-
-//     // Use atomic operation to prevent double booking
-//     const slot = await Slot.findOneAndUpdate(
-//       { _id: slotId, isBooked: false },
-//       { $set: { isBooked: true, bookedBy: email, roomId: roomId } },
-//       { new: true }
-//     );
-
-//     if (!slot) {
-//       return res.status(400).json({ message: "Slot not available or already booked" });
-//     }
-
-//     console.log("Updated Slot Data:", slot);
-
-//     // Ensure roomId is not undefined
-//     if (!slot.roomId) {
-//       return res.status(500).json({ message: "Error generating Room ID. Please try again." });
-//     }
-
-//     // Send confirmation email with Room ID
-//     const mailOptions = {
-//       from: process.env.EMAIL_USER,
-//       to: email,
-//       subject: "Slot Booking Confirmation ✅",
-//       html: `
-//         <h2>Hello,</h2>
-//         <p>Your interview slot has been <strong>successfully booked!</strong></p>
-//         <p><strong>Date:</strong> ${slot.date}</p>
-//         <p><strong>Time:</strong> ${slot.startTime} - ${slot.endTime}</p>
-//         <p><strong>Room ID:</strong> ${slot.roomId}</p>
-//         <p>You can join the meeting using this <a href="https://virtual-frontend-six.vercel.app/room/${slot.roomId}">Room Link</a> once the interview begins.</p>
-//         <p>One day before your interview, you will receive the meeting link again.</p>
-//         <br/>
-//         <p>Best Regards,</p>
-//         <p><strong>H2Vis Incubators</strong></p>
-//       `,
-//     };
-
-//     console.log("Room ID in Email:", slot.roomId);
-
-//     try {
-//       await transporter.sendMail(mailOptions);
-//       console.log("Confirmation email sent to:", email);
-//     } catch (emailError) {
-//       console.error("Failed to send confirmation email:", emailError);
-//       return res.status(500).json({ message: "Slot booked, but email failed to send" });
-//     }
-
-//     res.json({ message: "Slot booked successfully! Confirmation email sent." });
-
-//   } catch (error) {
-//     console.error("Error booking slot:", error);
-//     res.status(500).json({ message: "Booking failed" });
-//   }
-// });
-
 
 // 🚀 Start Server
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
