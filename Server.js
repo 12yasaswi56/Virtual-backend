@@ -965,138 +965,138 @@ app.get("/AdminMeetings", async (req, res) => {
 
 
 
-// import { v4 as uuidv4 } from "uuid"; // Correct import syntax
+ import { v4 as uuidv4 } from "uuid"; // Correct import syntax
 
-// app.post("/book-slot", async (req, res) => {
-//   const { slotId, email } = req.body;
+// // app.post("/book-slot", async (req, res) => {
+// //   const { slotId, email } = req.body;
 
-//   console.log("Received Slot ID:", slotId);
-//   console.log("Received Email:", email);
+// //   console.log("Received Slot ID:", slotId);
+// //   console.log("Received Email:", email);
 
-//   if (!slotId || !email) {
-//     return res.status(400).json({ message: "Slot ID and Email are required" });
-//   }
+// //   if (!slotId || !email) {
+// //     return res.status(400).json({ message: "Slot ID and Email are required" });
+// //   }
 
-//   try {
-//     const slot = await Slot.findById(slotId);
+// //   try {
+// //     const slot = await Slot.findById(slotId);
 
-//     console.log("Slot from DB:", slot);
+// //     console.log("Slot from DB:", slot);
 
-//     if (!slot) {
-//       return res.status(404).json({ message: "Slot not found" });
-//     }
+// //     if (!slot) {
+// //       return res.status(404).json({ message: "Slot not found" });
+// //     }
 
-//     if (slot.isBooked) {
-//       return res.status(400).json({ message: "Slot already booked" });
-//     }
+// //     if (slot.isBooked) {
+// //       return res.status(400).json({ message: "Slot already booked" });
+// //     }
 
-//     // Generate a unique room ID for the meeting
-//     const roomId = uuidv4();  // Generate the unique room ID
+// //     // Generate a unique room ID for the meeting
+// //     const roomId = uuidv4();  // Generate the unique room ID
 
-//     // Update slot booking status
-//     slot.isBooked = true;
-//     slot.bookedBy = email;
-//     slot.roomId = roomId;  // Optionally store the room ID in the slot document
-//     await slot.save();
+// //     // Update slot booking status
+// //     slot.isBooked = true;
+// //     slot.bookedBy = email;
+// //     slot.roomId = roomId;  // Optionally store the room ID in the slot document
+// //     await slot.save();
 
-//     // Send confirmation email with Room ID
-//     const mailOptions = {
-//       from: process.env.EMAIL_USER,
-//       to: email,
-//       subject: "Slot Booking Confirmation ✅",
-//       html: `
-//         <h2>Hello,</h2>
-//         <p>Your interview slot has been <strong>successfully booked!</strong></p>
-//         <p><strong>Date:</strong> ${slot.date}</p>
-//         <p><strong>Time:</strong> ${slot.time}</p>
-//         <p><strong>Room ID:</strong> ${roomId}</p>
-//         <p>You can join the meeting using this <a href="https://virtual-frontend-six.vercel.app//room/${roomId}">Room Link</a> once the interview begins.</p>
-//         <p>One day before your interview, you will receive the meeting link again.</p>
-//         <br/>
-//         <p>Best Regards,</p>
-//         <p><strong>H2Vis Incubators</strong></p>
-//       `,
-//     };
+// //     // Send confirmation email with Room ID
+// //     const mailOptions = {
+// //       from: process.env.EMAIL_USER,
+// //       to: email,
+// //       subject: "Slot Booking Confirmation ✅",
+// //       html: `
+// //         <h2>Hello,</h2>
+// //         <p>Your interview slot has been <strong>successfully booked!</strong></p>
+// //         <p><strong>Date:</strong> ${slot.date}</p>
+// //         <p><strong>Time:</strong> ${slot.time}</p>
+// //         <p><strong>Room ID:</strong> ${roomId}</p>
+// //         <p>You can join the meeting using this <a href="https://virtual-frontend-six.vercel.app//room/${roomId}">Room Link</a> once the interview begins.</p>
+// //         <p>One day before your interview, you will receive the meeting link again.</p>
+// //         <br/>
+// //         <p>Best Regards,</p>
+// //         <p><strong>H2Vis Incubators</strong></p>
+// //       `,
+// //     };
 
-//     await transporter.sendMail(mailOptions);
+// //     await transporter.sendMail(mailOptions);
 
-//     res.json({ message: "Slot booked successfully! Confirmation email sent." });
-//   } catch (error) {
-//     console.error("Error booking slot:", error);
-//     res.status(500).json({ message: "Booking failed" });
-//   }
-// });
+// //     res.json({ message: "Slot booked successfully! Confirmation email sent." });
+// //   } catch (error) {
+// //     console.error("Error booking slot:", error);
+// //     res.status(500).json({ message: "Booking failed" });
+// //   }
+// // });
 
 
 
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 
-// app.post("/book-slot", async (req, res) => {
-//   const { slotId, email } = req.body;
+app.post("/book-slot", async (req, res) => {
+  const { slotId, email } = req.body;
 
-//   console.log("Received Slot ID:", slotId);
-//   console.log("Received Email:", email);
+  console.log("Received Slot ID:", slotId);
+  console.log("Received Email:", email);
 
-//   if (!slotId || !email) {
-//     return res.status(400).json({ message: "Slot ID and Email are required" });
-//   }
+  if (!slotId || !email) {
+    return res.status(400).json({ message: "Slot ID and Email are required" });
+  }
 
-//   try {
-//     const slot = await Slot.findById(slotId);
+  try {
+    const slot = await Slot.findById(slotId);
 
-//     console.log("Slot from DB:", slot);
+    console.log("Slot from DB:", slot);
 
-//     if (!slot) {
-//       return res.status(404).json({ message: "Slot not found" });
-//     }
+    if (!slot) {
+      return res.status(404).json({ message: "Slot not found" });
+    }
 
-//     if (slot.isBooked) {
-//       return res.status(400).json({ message: "Slot already booked" });
-//     }
+    if (slot.isBooked) {
+      return res.status(400).json({ message: "Slot already booked" });
+    }
 
-//     // Generate a unique room ID for the meeting
-//     const roomId = uuidv4();  
+    // Generate a unique room ID for the meeting
+    const roomId = uuidv4();  
 
-//     // Update slot booking status
-//     slot.isBooked = true;
-//     slot.bookedBy = email;
-//     slot.roomId = roomId;  
-//     await slot.save();
+    // Update slot booking status
+    slot.isBooked = true;
+    slot.bookedBy = email;
+    slot.roomId = roomId;  
+    await slot.save();
 
-//     // Send confirmation email with Room ID
-//     const mailOptions = {
-//       from: process.env.EMAIL_USER,
-//       to: email,
-//       subject: "Slot Booking Confirmation ✅",
-//       html: `
-//         <h2>Hello,</h2>
-//         <p>Your interview slot has been <strong>successfully booked!</strong></p>
-//         <p><strong>Date:</strong> ${slot.date}</p>
-//         <p><strong>Time:</strong> ${slot.time}</p>
-//         <p><strong>Room ID:</strong> ${roomId}</p>
-//         <p>You can join the meeting using this <a href="https://virtual-frontend-six.vercel.app/room/${roomId}">Room Link</a> once the interview begins.</p>
-//         <p>One day before your interview, you will receive the meeting link again.</p>
-//         <br/>
-//         <p>Best Regards,</p>
-//         <p><strong>H2Vis Incubators</strong></p>
-//       `,
-//     };
+    // Send confirmation email with Room ID
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Slot Booking Confirmation ✅",
+      html: `
+        <h2>Hello,</h2>
+        <p>Your interview slot has been <strong>successfully booked!</strong></p>
+        <p><strong>Date:</strong> ${slot.date}</p>
+        <p><strong>Time:</strong> ${slot.startTime} - ${slot.endTime}</p>
+        <p><strong>Room ID:</strong> ${roomId}</p>
+        <p>You can join the meeting using this <a href="https://virtual-frontend-six.vercel.app/room/${roomId}">Room Link</a> once the interview begins.</p>
+        <p>One day before your interview, you will receive the meeting link again.</p>
+        <br/>
+        <p>Best Regards,</p>
+        <p><strong>H2Vis Incubators</strong></p>
+      `,
+    };
 
-//     try {
-//       await transporter.sendMail(mailOptions);
-//       console.log("Confirmation email sent to:", email);
-//     } catch (emailError) {
-//       console.error("Failed to send confirmation email:", emailError);
-//       return res.status(500).json({ message: "Slot booked, but email failed to send" });
-//     }
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log("Confirmation email sent to:", email);
+    } catch (emailError) {
+      console.error("Failed to send confirmation email:", emailError);
+      return res.status(500).json({ message: "Slot booked, but email failed to send" });
+    }
 
-//     res.json({ message: "Slot booked successfully! Confirmation email sent." });
+    res.json({ message: "Slot booked successfully! Confirmation email sent." });
 
-//   } catch (error) {
-//     console.error("Error booking slot:", error);
-//     res.status(500).json({ message: "Booking failed" });
-//   }
-// });
+  } catch (error) {
+    console.error("Error booking slot:", error);
+    res.status(500).json({ message: "Booking failed" });
+  }
+});
 
 
 // app.post("/book-slot", async (req, res) => {
@@ -1165,81 +1165,81 @@ import { v4 as uuidv4 } from "uuid";
 
 
 
-app.post("/book-slot", async (req, res) => {
-  const { slotId, email } = req.body;
+// app.post("/book-slot", async (req, res) => {
+//   const { slotId, email } = req.body;
 
-  console.log("Received Slot ID:", slotId);
-  console.log("Received Email:", email);
+//   console.log("Received Slot ID:", slotId);
+//   console.log("Received Email:", email);
 
-  if (!slotId || !email) {
-    return res.status(400).json({ message: "Slot ID and Email are required" });
-  }
+//   if (!slotId || !email) {
+//     return res.status(400).json({ message: "Slot ID and Email are required" });
+//   }
 
-  // Validate email format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ message: "Invalid email format" });
-  }
+//   // Validate email format
+//   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//   if (!emailRegex.test(email)) {
+//     return res.status(400).json({ message: "Invalid email format" });
+//   }
 
-  try {
-    // Generate Room ID before updating
-    const roomId = uuidv4();
-    console.log("Generated Room ID:", roomId);
+//   try {
+//     // Generate Room ID before updating
+//     const roomId = uuidv4();
+//     console.log("Generated Room ID:", roomId);
 
-    // Use atomic operation to prevent double booking
-    const slot = await Slot.findOneAndUpdate(
-      { _id: slotId, isBooked: false },
-      { $set: { isBooked: true, bookedBy: email, roomId: roomId } },
-      { new: true }
-    );
+//     // Use atomic operation to prevent double booking
+//     const slot = await Slot.findOneAndUpdate(
+//       { _id: slotId, isBooked: false },
+//       { $set: { isBooked: true, bookedBy: email, roomId: roomId } },
+//       { new: true }
+//     );
 
-    if (!slot) {
-      return res.status(400).json({ message: "Slot not available or already booked" });
-    }
+//     if (!slot) {
+//       return res.status(400).json({ message: "Slot not available or already booked" });
+//     }
 
-    console.log("Updated Slot Data:", slot);
+//     console.log("Updated Slot Data:", slot);
 
-    // Ensure roomId is not undefined
-    if (!slot.roomId) {
-      return res.status(500).json({ message: "Error generating Room ID. Please try again." });
-    }
+//     // Ensure roomId is not undefined
+//     if (!slot.roomId) {
+//       return res.status(500).json({ message: "Error generating Room ID. Please try again." });
+//     }
 
-    // Send confirmation email with Room ID
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Slot Booking Confirmation ✅",
-      html: `
-        <h2>Hello,</h2>
-        <p>Your interview slot has been <strong>successfully booked!</strong></p>
-        <p><strong>Date:</strong> ${slot.date}</p>
-        <p><strong>Time:</strong> ${slot.startTime} - ${slot.endTime}</p>
-        <p><strong>Room ID:</strong> ${slot.roomId}</p>
-        <p>You can join the meeting using this <a href="https://virtual-frontend-six.vercel.app/room/${slot.roomId}">Room Link</a> once the interview begins.</p>
-        <p>One day before your interview, you will receive the meeting link again.</p>
-        <br/>
-        <p>Best Regards,</p>
-        <p><strong>H2Vis Incubators</strong></p>
-      `,
-    };
+//     // Send confirmation email with Room ID
+//     const mailOptions = {
+//       from: process.env.EMAIL_USER,
+//       to: email,
+//       subject: "Slot Booking Confirmation ✅",
+//       html: `
+//         <h2>Hello,</h2>
+//         <p>Your interview slot has been <strong>successfully booked!</strong></p>
+//         <p><strong>Date:</strong> ${slot.date}</p>
+//         <p><strong>Time:</strong> ${slot.startTime} - ${slot.endTime}</p>
+//         <p><strong>Room ID:</strong> ${slot.roomId}</p>
+//         <p>You can join the meeting using this <a href="https://virtual-frontend-six.vercel.app/room/${slot.roomId}">Room Link</a> once the interview begins.</p>
+//         <p>One day before your interview, you will receive the meeting link again.</p>
+//         <br/>
+//         <p>Best Regards,</p>
+//         <p><strong>H2Vis Incubators</strong></p>
+//       `,
+//     };
 
-    console.log("Room ID in Email:", slot.roomId);
+//     console.log("Room ID in Email:", slot.roomId);
 
-    try {
-      await transporter.sendMail(mailOptions);
-      console.log("Confirmation email sent to:", email);
-    } catch (emailError) {
-      console.error("Failed to send confirmation email:", emailError);
-      return res.status(500).json({ message: "Slot booked, but email failed to send" });
-    }
+//     try {
+//       await transporter.sendMail(mailOptions);
+//       console.log("Confirmation email sent to:", email);
+//     } catch (emailError) {
+//       console.error("Failed to send confirmation email:", emailError);
+//       return res.status(500).json({ message: "Slot booked, but email failed to send" });
+//     }
 
-    res.json({ message: "Slot booked successfully! Confirmation email sent." });
+//     res.json({ message: "Slot booked successfully! Confirmation email sent." });
 
-  } catch (error) {
-    console.error("Error booking slot:", error);
-    res.status(500).json({ message: "Booking failed" });
-  }
-});
+//   } catch (error) {
+//     console.error("Error booking slot:", error);
+//     res.status(500).json({ message: "Booking failed" });
+//   }
+// });
 
 
 // 🚀 Start Server
