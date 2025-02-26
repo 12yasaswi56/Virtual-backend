@@ -1029,7 +1029,7 @@ app.get("/AdminMeetings", async (req, res) => {
 
 
 
-//import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 
 // app.post("/book-slot", async (req, res) => {
 //   const { slotId, email } = req.body;
@@ -1163,7 +1163,7 @@ app.get("/AdminMeetings", async (req, res) => {
 // });
 
 
-const { v4: uuidv4 } = require("uuid"); // Ensure UUID is imported
+
 
 app.post("/book-slot", async (req, res) => {
   const { slotId, email } = req.body;
