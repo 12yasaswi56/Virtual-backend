@@ -317,35 +317,68 @@ const io = new Server(server, {
   },
 });
 
-
-let users={}
 // Handle socket connections
-io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
 
-  socket.on("joinRoom", ({ userId }) => {
-    users[userId] = socket.id;
-    console.log(`User ${userId} joined with socket ID: ${socket.id}`);
+let users = {};
+
+io.on("connection", (socket) => {
+  socket.on("join-room", ({ roomId, userName }) => {
+    users[socket.id] = { roomId, userName };
+    socket.join(roomId);
+    socket.broadcast.to(roomId).emit("user-joined", { userId: socket.id, userName });
   });
 
-  socket.on("sendMessage", ({ senderId, receiverId, message }) => {
-    console.log(`Message from ${senderId} to ${receiverId}: ${message}`);
-    
-    // Send message to the receiver
-    if (users[receiverId]) {
-      io.to(users[receiverId]).emit("receiveMessage", { senderId, message });
-    }
+  socket.on("offer", ({ target, signal }) => {
+    io.to(target).emit("offer", { sender: socket.id, signal });
+  });
+
+  socket.on("answer", ({ target, signal }) => {
+    io.to(target).emit("answer", { sender: socket.id, signal });
+  });
+
+  socket.on("send-message", ({ roomId, message, userName }) => {
+    io.to(roomId).emit("receive-message", { message, userName });
+  });
+
+  socket.on("hand-raise", ({ roomId, userName }) => {
+    io.to(roomId).emit("hand-raised", { userName });
   });
 
   socket.on("disconnect", () => {
-    console.log("A user disconnected:", socket.id);
-    Object.keys(users).forEach((userId) => {
-      if (users[userId] === socket.id) {
-        delete users[userId];
-      }
-    });
+    const user = users[socket.id];
+    if (user) {
+      io.to(user.roomId).emit("user-left", { userId: socket.id, userName: user.userName });
+      delete users[socket.id];
+    }
   });
 });
+
+// io.on("connection", (socket) => {
+//   console.log("A user connected:", socket.id);
+
+//   socket.on("joinRoom", ({ userId }) => {
+//     users[userId] = socket.id;
+//     console.log(`User ${userId} joined with socket ID: ${socket.id}`);
+//   });
+
+//   socket.on("sendMessage", ({ senderId, receiverId, message }) => {
+//     console.log(`Message from ${senderId} to ${receiverId}: ${message}`);
+    
+//     // Send message to the receiver
+//     if (users[receiverId]) {
+//       io.to(users[receiverId]).emit("receiveMessage", { senderId, message });
+//     }
+//   });
+
+//   socket.on("disconnect", () => {
+//     console.log("A user disconnected:", socket.id);
+//     Object.keys(users).forEach((userId) => {
+//       if (users[userId] === socket.id) {
+//         delete users[userId];
+//       }
+//     });
+//   });
+// });
 
 
 // 📝 Register Route
