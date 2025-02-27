@@ -17,6 +17,51 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+
+const helmet = require("helmet");
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"], // Allow only same-origin content
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'", // If inline scripts are used
+          "https://apis.google.com", // Google APIs
+          "https://virtual-frontend-six.vercel.app", // Your frontend
+        ],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'", // Inline styles (needed for some libraries)
+          "https://fonts.googleapis.com", // Google Fonts
+        ],
+        imgSrc: [
+          "'self'",
+          "data:", // Allow images from base64 data
+          "https://your-image-source.com", // If you're fetching images externally
+          "https://virtual-frontend-six.vercel.app",
+        ],
+        connectSrc: [
+          "'self'",
+          "https://virtual-frontend-six.vercel.app", // Allow API requests from frontend
+          "wss://virtual-backend-4.onrender.com", // WebSockets for real-time communication
+        ],
+        frameSrc: [
+          "'self'",
+          "https://www.youtube.com", // Allow embedding YouTube videos
+        ],
+        fontSrc: [
+          "'self'",
+          "https://fonts.gstatic.com", // Google Fonts
+        ],
+        objectSrc: ["'none'"], // Block plugin content (e.g., Flash)
+        upgradeInsecureRequests: [], // Upgrade HTTP to HTTPS
+      },
+    },
+  })
+);
+
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
