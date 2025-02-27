@@ -15,7 +15,19 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+//app.use(cors());
+
+
+
+const corsOptions = {
+  origin: "https://virtual-frontend-six.vercel.app", // Only allow your frontend
+  methods: ["GET", "POST","PUT"], // Restrict to only necessary methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Only allow specific headers
+  credentials: true, // Allow cookies if needed
+  optionsSuccessStatus: 204 // Handle preflight requests efficiently
+};
+
+app.use(cors(corsOptions));
 
 
 const helmet = require("helmet");
