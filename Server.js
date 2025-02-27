@@ -312,7 +312,7 @@ const sendOTPEmail = (email, otp) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "https://virtual-frontend-six.vercel.app/",
     methods: ["GET", "POST"],
   },
 });
@@ -320,64 +320,113 @@ const io = new Server(server, {
 // Handle socket connections
 
 const rooms = {}; // Stores participants in each room
-
 io.on("connection", (socket) => {
-  console.log("New user connected:", socket.id);
+  console.log("New client connected:", socket.id);
 
-  // Handle user joining a room
   socket.on("join-room", ({ roomId, email }) => {
-    if (!rooms[roomId]) rooms[roomId] = [];
-    
+    console.log(`${email} joined room: ${roomId}`);
+
+    if (!rooms[roomId]) {
+      rooms[roomId] = [];
+    }
+
     rooms[roomId].push({ userId: socket.id, email });
-    
+
     socket.join(roomId);
+    socket.emit("all-users", rooms[roomId].filter(user => user.userId !== socket.id));
     
-    // Send the existing users to the new user
-    socket.emit("all-users", rooms[roomId]);
-
-    // Notify others in the room
-    socket.broadcast.to(roomId).emit("user-joined", { userId: socket.id, email });
-
-    console.log(`User ${email} joined room ${roomId}`);
+    socket.to(roomId).emit("user-joined", { userId: socket.id, email });
   });
 
-  // Handle peer signaling
   socket.on("sending-signal", ({ userToSignal, callerID, signal }) => {
-    io.to(userToSignal).emit("receiving-returned-signal", { signal, id: callerID });
+    io.to(userToSignal).emit("user-joined", { signal, callerID });
   });
 
   socket.on("returning-signal", ({ signal, callerID }) => {
     io.to(callerID).emit("receiving-returned-signal", { signal, id: socket.id });
   });
 
-  // Handle chat messages
   socket.on("send-message", ({ roomId, message, email }) => {
     io.to(roomId).emit("receive-message", { message, email });
   });
 
-  // Handle hand raise
   socket.on("hand-raise", ({ roomId, email }) => {
     io.to(roomId).emit("hand-raised", { email });
   });
 
-  // Handle user leaving the room
   socket.on("leave-room", ({ roomId, email }) => {
-    if (rooms[roomId]) {
-      rooms[roomId] = rooms[roomId].filter((user) => user.userId !== socket.id);
-      io.to(roomId).emit("user-left", { userId: socket.id });
-      console.log(`User ${email} left room ${roomId}`);
-    }
+    console.log(`${email} left room: ${roomId}`);
+    rooms[roomId] = rooms[roomId].filter((user) => user.userId !== socket.id);
+    socket.to(roomId).emit("user-left", { userId: socket.id });
     socket.leave(roomId);
   });
 
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
-    for (const room in rooms) {
-      rooms[room] = rooms[room].filter((user) => user.userId !== socket.id);
-      io.to(room).emit("user-left", { userId: socket.id });
+    for (const roomId in rooms) {
+      rooms[roomId] = rooms[roomId].filter((user) => user.userId !== socket.id);
+      io.to(roomId).emit("user-left", { userId: socket.id });
     }
   });
 });
+
+// io.on("connection", (socket) => {
+//   console.log("New user connected:", socket.id);
+
+//   // Handle user joining a room
+//   socket.on("join-room", ({ roomId, email }) => {
+//     if (!rooms[roomId]) rooms[roomId] = [];
+    
+//     rooms[roomId].push({ userId: socket.id, email });
+    
+//     socket.join(roomId);
+    
+//     // Send the existing users to the new user
+//     socket.emit("all-users", rooms[roomId]);
+
+//     // Notify others in the room
+//     socket.broadcast.to(roomId).emit("user-joined", { userId: socket.id, email });
+
+//     console.log(`User ${email} joined room ${roomId}`);
+//   });
+
+//   // Handle peer signaling
+//   socket.on("sending-signal", ({ userToSignal, callerID, signal }) => {
+//     io.to(userToSignal).emit("receiving-returned-signal", { signal, id: callerID });
+//   });
+
+//   socket.on("returning-signal", ({ signal, callerID }) => {
+//     io.to(callerID).emit("receiving-returned-signal", { signal, id: socket.id });
+//   });
+
+//   // Handle chat messages
+//   socket.on("send-message", ({ roomId, message, email }) => {
+//     io.to(roomId).emit("receive-message", { message, email });
+//   });
+
+//   // Handle hand raise
+//   socket.on("hand-raise", ({ roomId, email }) => {
+//     io.to(roomId).emit("hand-raised", { email });
+//   });
+
+//   // Handle user leaving the room
+//   socket.on("leave-room", ({ roomId, email }) => {
+//     if (rooms[roomId]) {
+//       rooms[roomId] = rooms[roomId].filter((user) => user.userId !== socket.id);
+//       io.to(roomId).emit("user-left", { userId: socket.id });
+//       console.log(`User ${email} left room ${roomId}`);
+//     }
+//     socket.leave(roomId);
+//   });
+
+//   socket.on("disconnect", () => {
+//     console.log("User disconnected:", socket.id);
+//     for (const room in rooms) {
+//       rooms[room] = rooms[room].filter((user) => user.userId !== socket.id);
+//       io.to(room).emit("user-left", { userId: socket.id });
+//     }
+//   });
+// });
 // let users = {};
 
 // io.on("connection", (socket) => {
