@@ -319,39 +319,98 @@ const io = new Server(server, {
 
 // Handle socket connections
 
-let users = {};
+const rooms = {}; // Stores participants in each room
 
 io.on("connection", (socket) => {
-  socket.on("join-room", ({ roomId, userName }) => {
-    users[socket.id] = { roomId, userName };
+  console.log("New user connected:", socket.id);
+
+  // Handle user joining a room
+  socket.on("join-room", ({ roomId, email }) => {
+    if (!rooms[roomId]) rooms[roomId] = [];
+    
+    rooms[roomId].push({ userId: socket.id, email });
+    
     socket.join(roomId);
-    socket.broadcast.to(roomId).emit("user-joined", { userId: socket.id, userName });
+    
+    // Send the existing users to the new user
+    socket.emit("all-users", rooms[roomId]);
+
+    // Notify others in the room
+    socket.broadcast.to(roomId).emit("user-joined", { userId: socket.id, email });
+
+    console.log(`User ${email} joined room ${roomId}`);
   });
 
-  socket.on("offer", ({ target, signal }) => {
-    io.to(target).emit("offer", { sender: socket.id, signal });
+  // Handle peer signaling
+  socket.on("sending-signal", ({ userToSignal, callerID, signal }) => {
+    io.to(userToSignal).emit("receiving-returned-signal", { signal, id: callerID });
   });
 
-  socket.on("answer", ({ target, signal }) => {
-    io.to(target).emit("answer", { sender: socket.id, signal });
+  socket.on("returning-signal", ({ signal, callerID }) => {
+    io.to(callerID).emit("receiving-returned-signal", { signal, id: socket.id });
   });
 
-  socket.on("send-message", ({ roomId, message, userName }) => {
-    io.to(roomId).emit("receive-message", { message, userName });
+  // Handle chat messages
+  socket.on("send-message", ({ roomId, message, email }) => {
+    io.to(roomId).emit("receive-message", { message, email });
   });
 
-  socket.on("hand-raise", ({ roomId, userName }) => {
-    io.to(roomId).emit("hand-raised", { userName });
+  // Handle hand raise
+  socket.on("hand-raise", ({ roomId, email }) => {
+    io.to(roomId).emit("hand-raised", { email });
+  });
+
+  // Handle user leaving the room
+  socket.on("leave-room", ({ roomId, email }) => {
+    if (rooms[roomId]) {
+      rooms[roomId] = rooms[roomId].filter((user) => user.userId !== socket.id);
+      io.to(roomId).emit("user-left", { userId: socket.id });
+      console.log(`User ${email} left room ${roomId}`);
+    }
+    socket.leave(roomId);
   });
 
   socket.on("disconnect", () => {
-    const user = users[socket.id];
-    if (user) {
-      io.to(user.roomId).emit("user-left", { userId: socket.id, userName: user.userName });
-      delete users[socket.id];
+    console.log("User disconnected:", socket.id);
+    for (const room in rooms) {
+      rooms[room] = rooms[room].filter((user) => user.userId !== socket.id);
+      io.to(room).emit("user-left", { userId: socket.id });
     }
   });
 });
+// let users = {};
+
+// io.on("connection", (socket) => {
+//   socket.on("join-room", ({ roomId, userName }) => {
+//     users[socket.id] = { roomId, userName };
+//     socket.join(roomId);
+//     socket.broadcast.to(roomId).emit("user-joined", { userId: socket.id, userName });
+//   });
+
+//   socket.on("offer", ({ target, signal }) => {
+//     io.to(target).emit("offer", { sender: socket.id, signal });
+//   });
+
+//   socket.on("answer", ({ target, signal }) => {
+//     io.to(target).emit("answer", { sender: socket.id, signal });
+//   });
+
+//   socket.on("send-message", ({ roomId, message, userName }) => {
+//     io.to(roomId).emit("receive-message", { message, userName });
+//   });
+
+//   socket.on("hand-raise", ({ roomId, userName }) => {
+//     io.to(roomId).emit("hand-raised", { userName });
+//   });
+
+//   socket.on("disconnect", () => {
+//     const user = users[socket.id];
+//     if (user) {
+//       io.to(user.roomId).emit("user-left", { userId: socket.id, userName: user.userName });
+//       delete users[socket.id];
+//     }
+//   });
+// });
 
 // io.on("connection", (socket) => {
 //   console.log("A user connected:", socket.id);
