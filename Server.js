@@ -305,15 +305,15 @@ const Mentor = mongoose.model("Mentor", mentorSchema);
 //     res.status(500).json({ message: "Server error. Please try again." });
 //   }
 // });
-
-app.post("/mentor-apply", async (req, res) => {
+// Mentor Application Route
+app.post("/mentor-apply", upload.single("resume"), async (req, res) => {
   try {
     console.log("Received Mentor Data:", req.body); // Debugging Step
 
-    let { name, email, phone, expertise, experience, bio, linkedin, resume } = req.body;
+    let { name, email, phone, expertise, experience, bio, linkedin } = req.body;
 
-    if (!name || !email || !phone || !expertise || !experience || !bio || !resume) {
-      return res.status(400).json({ message: "Please fill in all required fields." });
+    if (!name || !email || !phone || !expertise || !experience || !bio || !req.file) {
+      return res.status(400).json({ message: "Please fill in all required fields, including resume." });
     }
 
     const existingMentor = await Mentor.findOne({ email });
@@ -321,22 +321,22 @@ app.post("/mentor-apply", async (req, res) => {
       return res.status(400).json({ message: "Mentor with this email already applied." });
     }
 
-    const experienceNumber = Number(experience); // Ensure experience is stored as a number
+    const experienceNumber = Number(experience); // Ensure experience is a valid number
     if (isNaN(experienceNumber)) {
       return res.status(400).json({ message: "Experience must be a valid number." });
     }
 
-    const mentor = new Mentor({ 
-      name, 
-      email, 
-      phone, 
-      expertise, 
-      experience: experienceNumber, 
-      status: "Pending", // Correct capitalization
-      isAvailable: false, // Fix field name
-      bio, 
-      linkedin, 
-      resume 
+    const mentor = new Mentor({
+      name,
+      email,
+      phone,
+      expertise,
+      experience: experienceNumber,
+      status: "Pending",
+      isAvailable: false,
+      bio,
+      linkedin,
+      resume: req.file.path, // Store file path in DB
     });
 
     console.log("Mentor being saved:", mentor); // Debugging Step
@@ -348,6 +348,49 @@ app.post("/mentor-apply", async (req, res) => {
     res.status(500).json({ message: "Server error. Please try again." });
   }
 });
+
+// app.post("/mentor-apply", async (req, res) => {
+//   try {
+//     console.log("Received Mentor Data:", req.body); // Debugging Step
+
+//     let { name, email, phone, expertise, experience, bio, linkedin, resume } = req.body;
+
+//     if (!name || !email || !phone || !expertise || !experience || !bio || !resume) {
+//       return res.status(400).json({ message: "Please fill in all required fields." });
+//     }
+
+//     const existingMentor = await Mentor.findOne({ email });
+//     if (existingMentor) {
+//       return res.status(400).json({ message: "Mentor with this email already applied." });
+//     }
+
+//     const experienceNumber = Number(experience); // Ensure experience is stored as a number
+//     if (isNaN(experienceNumber)) {
+//       return res.status(400).json({ message: "Experience must be a valid number." });
+//     }
+
+//     const mentor = new Mentor({ 
+//       name, 
+//       email, 
+//       phone, 
+//       expertise, 
+//       experience: experienceNumber, 
+//       status: "Pending", // Correct capitalization
+//       isAvailable: false, // Fix field name
+//       bio, 
+//       linkedin, 
+//       resume 
+//     });
+
+//     console.log("Mentor being saved:", mentor); // Debugging Step
+
+//     await mentor.save();
+//     res.status(201).json({ message: "Mentor application submitted successfully!" });
+//   } catch (error) {
+//     console.error("Error saving mentor:", error);
+//     res.status(500).json({ message: "Server error. Please try again." });
+//   }
+// });
 
 
 // Endpoint to fetch all mentor applications (for admin)
