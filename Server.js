@@ -212,18 +212,6 @@ app.get("/startup", async (req, res) => {
   }
 });
 
-
-
-
-// const mentorSchema = new mongoose.Schema({
-//   name: { type: String, required: true, trim: true },
-//   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-//   expertise: { type: String, required: true, trim: true },
-//   status: { type: String, default: "Pending", enum: ["Pending", "Approved", "Rejected"] }, // Admin Approval
-//   isAvailable: { type: Boolean, default: false }, // Default: Not Available
-//   appliedAt: { type: Date, default: Date.now },
-// });
-
 const mentorSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
@@ -243,41 +231,62 @@ const mentorSchema = new mongoose.Schema({
 const Mentor = mongoose.model("Mentor", mentorSchema);
 
 
-// Mentor Application Route
+// // Mentor Application Route
+// app.post("/mentor-apply", async (req, res) => {
+//   const { name, email, expertise } = req.body;
+
+//   // ✅ Check if all fields are provided
+//   if (!name || !email || !expertise) {
+//     return res.status(400).json({ message: "All fields are required" });
+//   }
+
+//   try {
+//     // ✅ Check if mentor already exists
+//     const existingMentor = await Mentor.findOne({ email });
+//     if (existingMentor) {
+//       return res.status(400).json({ message: "Mentor with this email already exists!" });
+//     }
+
+//     // ✅ Create a new mentor application (status set to "Pending", availability is false)
+//     const newMentor = new Mentor({
+//       name,
+//       email,
+//       expertise,
+//       status: "Pending", // Admin needs to approve
+//       available: false, // Initially not available until approved
+//     });
+
+//     await newMentor.save(); // Save to database
+
+//     // ✅ Send success response
+//     return res.status(200).json({ message: "Application submitted successfully!" });
+//   } catch (err) {
+//     console.error("Error saving mentor application:", err);
+//     return res.status(500).json({ message: "Server error. Try again later." });
+//   }
+// });
+
+
 app.post("/mentor-apply", async (req, res) => {
-  const { name, email, expertise } = req.body;
-
-  // ✅ Check if all fields are provided
-  if (!name || !email || !expertise) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-
   try {
-    // ✅ Check if mentor already exists
-    const existingMentor = await Mentor.findOne({ email });
-    if (existingMentor) {
-      return res.status(400).json({ message: "Mentor with this email already exists!" });
+    const { name, email, phone, expertise, experience, bio, linkedin, resume } = req.body;
+
+    if (!name || !email || !phone || !expertise || !experience || !bio || !resume) {
+      return res.status(400).json({ message: "Please fill in all required fields." });
     }
 
-    // ✅ Create a new mentor application (status set to "Pending", availability is false)
-    const newMentor = new Mentor({
-      name,
-      email,
-      expertise,
-      status: "Pending", // Admin needs to approve
-      available: false, // Initially not available until approved
-    });
+    const existingMentor = await Mentor.findOne({ email });
+    if (existingMentor) {
+      return res.status(400).json({ message: "Mentor with this email already applied." });
+    }
 
-    await newMentor.save(); // Save to database
-
-    // ✅ Send success response
-    return res.status(200).json({ message: "Application submitted successfully!" });
-  } catch (err) {
-    console.error("Error saving mentor application:", err);
-    return res.status(500).json({ message: "Server error. Try again later." });
+    const mentor = new Mentor({ name, email, phone, expertise, experience,status : "pending",available : false, bio, linkedin, resume ,});
+    await mentor.save();
+    res.status(201).json({ message: "Mentor application submitted successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error. Please try again." });
   }
 });
-
 
 
 // Endpoint to fetch all mentor applications (for admin)
