@@ -19,60 +19,60 @@ app.use(express.json());
 
 
 
-const corsOptions = {
-  origin: "https://virtual-frontend-six.vercel.app", // Only allow your frontend
-  methods: ["GET", "POST","PUT"], // Restrict to only necessary methods
-  allowedHeaders: ["Content-Type", "Authorization"], // Only allow specific headers
-  credentials: true, // Allow cookies if needed
-  optionsSuccessStatus: 204 // Handle preflight requests efficiently
-};
+// const corsOptions = {
+//   origin: "https://virtual-frontend-six.vercel.app", // Only allow your frontend
+//   methods: ["GET", "POST","PUT"], // Restrict to only necessary methods
+//   allowedHeaders: ["Content-Type", "Authorization"], // Only allow specific headers
+//   credentials: true, // Allow cookies if needed
+//   optionsSuccessStatus: 204 // Handle preflight requests efficiently
+// };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 
-const helmet = require("helmet");
+// const helmet = require("helmet");
 
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"], // Allow only same-origin content
-        scriptSrc: [
-          "'self'",
-          "'unsafe-inline'", // If inline scripts are used
-          "https://apis.google.com", // Google APIs
-          "https://virtual-frontend-six.vercel.app", // Your frontend
-        ],
-        styleSrc: [
-          "'self'",
-          "'unsafe-inline'", // Inline styles (needed for some libraries)
-          "https://fonts.googleapis.com", // Google Fonts
-        ],
-        imgSrc: [
-          "'self'",
-          "data:", // Allow images from base64 data
-          "https://your-image-source.com", // If you're fetching images externally
-          "https://virtual-frontend-six.vercel.app",
-        ],
-        connectSrc: [
-          "'self'",
-          "https://virtual-frontend-six.vercel.app", // Allow API requests from frontend
-          "wss://virtual-backend-4.onrender.com", // WebSockets for real-time communication
-        ],
-        frameSrc: [
-          "'self'",
-          "https://www.youtube.com", // Allow embedding YouTube videos
-        ],
-        fontSrc: [
-          "'self'",
-          "https://fonts.gstatic.com", // Google Fonts
-        ],
-        objectSrc: ["'none'"], // Block plugin content (e.g., Flash)
-        upgradeInsecureRequests: [], // Upgrade HTTP to HTTPS
-      },
-    },
-  })
-);
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       directives: {
+//         defaultSrc: ["'self'"], // Allow only same-origin content
+//         scriptSrc: [
+//           "'self'",
+//           "'unsafe-inline'", // If inline scripts are used
+//           "https://apis.google.com", // Google APIs
+//           "https://virtual-frontend-six.vercel.app", // Your frontend
+//         ],
+//         styleSrc: [
+//           "'self'",
+//           "'unsafe-inline'", // Inline styles (needed for some libraries)
+//           "https://fonts.googleapis.com", // Google Fonts
+//         ],
+//         imgSrc: [
+//           "'self'",
+//           "data:", // Allow images from base64 data
+//           "https://your-image-source.com", // If you're fetching images externally
+//           "https://virtual-frontend-six.vercel.app",
+//         ],
+//         connectSrc: [
+//           "'self'",
+//           "https://virtual-frontend-six.vercel.app", // Allow API requests from frontend
+//           "wss://virtual-backend-4.onrender.com", // WebSockets for real-time communication
+//         ],
+//         frameSrc: [
+//           "'self'",
+//           "https://www.youtube.com", // Allow embedding YouTube videos
+//         ],
+//         fontSrc: [
+//           "'self'",
+//           "https://fonts.gstatic.com", // Google Fonts
+//         ],
+//         objectSrc: ["'none'"], // Block plugin content (e.g., Flash)
+//         upgradeInsecureRequests: [], // Upgrade HTTP to HTTPS
+//       },
+//     },
+//   })
+// );
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
@@ -448,35 +448,6 @@ app.get("/chats", async (req, res) => {
   }
 });
 
-
-// WebSocket Chat Logic
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
-  socket.on("registerUser", (user) => {
-    socket.join(user);
-    console.log(`User ${user} joined chat`);
-  });
-
-  socket.on("sendMessage", async (data) => {
-    const { sender, receiver, message } = data;
-    if (!sender || !receiver || !message) return;
-
-    // Save message to database
-    const newMessage = new Chat({ sender, receiver, message });
-    await newMessage.save();
-
-    // Emit message to receiver
-    io.to(receiver).emit("receiveMessage", newMessage);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
-});
-
-
-
 // 🔹 OTP Verification Route
 app.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
@@ -661,7 +632,8 @@ app.get("/AdminMeetings", async (req, res) => {
 
 
 
-const { google } = require("googleapis");
+ import { google } from "googleapis";
+
 
 const createGoogleMeetEvent = async (email, startTime, endTime) => {
   try {
