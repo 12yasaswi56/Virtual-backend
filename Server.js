@@ -183,6 +183,8 @@ const startupSchema = new mongoose.Schema({
   phone: String,
   industry: String,
   description: String,
+  personalNote:String,
+  pitchDeck: String,
 });
 
 const Startup = mongoose.model("Startup", startupSchema);
@@ -244,6 +246,7 @@ const mentorSchema = new mongoose.Schema({
   status: { type: String, default: "Pending", enum: ["Pending", "Approved", "Rejected"] },
   isAvailable: { type: Boolean, default: false },
   appliedAt: { type: Date, default: Date.now },
+  experience:Number,
 });
 
 const Mentor = mongoose.model("Mentor", mentorSchema);
@@ -792,6 +795,25 @@ io.on("connection", (socket) => {
 
 
 
+<<<<<<< HEAD
+=======
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> c0e983f (first commit)
 // 🔹 OTP Verification Route
 app.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
