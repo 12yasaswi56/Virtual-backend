@@ -183,8 +183,6 @@ const startupSchema = new mongoose.Schema({
   phone: String,
   industry: String,
   description: String,
-  personalNote:String,
-  pitchDeck: String,
 });
 
 const Startup = mongoose.model("Startup", startupSchema);
@@ -228,7 +226,6 @@ const mentorSchema = new mongoose.Schema({
   status: { type: String, default: "Pending", enum: ["Pending", "Approved", "Rejected"] },
   isAvailable: { type: Boolean, default: false },
   appliedAt: { type: Date, default: Date.now },
-  experience:Number,
 });
 
 const Mentor = mongoose.model("Mentor", mentorSchema);
@@ -480,25 +477,6 @@ io.on("connection", (socket) => {
 
 
 
-<<<<<<< HEAD
-=======
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> c0e983f (first commit)
 // 🔹 OTP Verification Route
 app.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
@@ -756,8 +734,83 @@ app.get("/AdminMeetings", async (req, res) => {
 
 
 // Google Calendar Authentication
+// const auth = new google.auth.GoogleAuth({
+//   keyFile: "C:/Users/lenovo/Downloads/Virtual-backend/service-account.json"  // Update this
+//   scopes : ["https://www.googleapis.com/auth/calendar"],
+// });
+
+// const calendar = google.calendar({ version: "v3", auth });
+
+// app.post("/book-slot", async (req, res) => {
+//   const { slotId, email } = req.body;
+
+//   if (!slotId || !email) {
+//     return res.status(400).json({ message: "Slot ID and Email are required" });
+//   }
+
+//   try {
+//     const slot = await Slot.findById(slotId);
+//     if (!slot) return res.status(404).json({ message: "Slot not found" });
+//     if (slot.isBooked) return res.status(400).json({ message: "Slot already booked" });
+
+//     const roomId = uuidv4();
+//     const event = {
+//       summary: "H2Vis Incubators Interview",
+//       description: `Interview slot booked by ${email}`,
+//       start: { dateTime: `${slot.date}T${slot.startTime}:00Z`, timeZone: "Asia/Kolkata" },
+//       end: { dateTime: `${slot.date}T${slot.endTime}:00Z`, timeZone: "Asia/Kolkata" },
+//       attendees: [{ email }],
+//       conferenceData: {
+//         createRequest: { requestId: roomId },
+//       },
+//     };
+
+//     // Create Google Calendar Event
+//     const eventResponse = await calendar.events.insert({
+//       calendarId: "primary",
+//       resource: event,
+//       conferenceDataVersion: 1,
+//     });
+
+//     const meetLink = eventResponse.data.hangoutLink;
+//     if (!meetLink) throw new Error("Google Meet link not generated");
+
+//     slot.isBooked = true;
+//     slot.bookedBy = email;
+//     slot.roomId = roomId;
+//     slot.meetLink = meetLink;
+//     await slot.save();
+
+//     // Send confirmation email
+//     const mailOptions = {
+//       from: process.env.EMAIL_USER,
+//       to: email,
+//       subject: "Slot Booking Confirmation ✅",
+//       html: `
+//         <h2>Hello,</h2>
+//         <p>Your interview slot has been <strong>successfully booked!</strong></p>
+//         <p><strong>Date:</strong> ${slot.date}</p>
+//         <p><strong>Time:</strong> ${slot.startTime} - ${slot.endTime}</p>
+//         <p><strong>Google Meet Link:</strong> <a href="${meetLink}">${meetLink}</a></p>
+//         <p>Join the meeting at the scheduled time.</p>
+//         <br/>
+//         <p>Best Regards,</p>
+//         <p><strong>H2Vis Incubators</strong></p>
+//       `,
+//     };
+
+//     await transporter.sendMail(mailOptions);
+//     res.json({ message: "Slot booked successfully! Google Meet link sent." });
+
+//   } catch (error) {
+//     console.error("Error booking slot:", error);
+//     res.status(500).json({ message: "Booking failed" });
+//   }
+// });
+
+
 const auth = new google.auth.GoogleAuth({
-  keyFile: "C:\Users\lenovo\Downloads\Virtual-backend\service-account.json.json", // Update this
+  keyFile: "C:/Users/lenovo/Downloads/Virtual-backend/service-account.json", // FIXED PATH
   scopes: ["https://www.googleapis.com/auth/calendar"],
 });
 
@@ -779,19 +832,22 @@ app.post("/book-slot", async (req, res) => {
     const event = {
       summary: "H2Vis Incubators Interview",
       description: `Interview slot booked by ${email}`,
-      start: { dateTime: `${slot.date}T${slot.startTime}:00Z`, timeZone: "Asia/Kolkata" },
-      end: { dateTime: `${slot.date}T${slot.endTime}:00Z`, timeZone: "Asia/Kolkata" },
+      start: { dateTime: `${slot.date}T${slot.startTime}:00+05:30`, timeZone: "Asia/Kolkata" },
+      end: { dateTime: `${slot.date}T${slot.endTime}:00+05:30`, timeZone: "Asia/Kolkata" },
       attendees: [{ email }],
       conferenceData: {
-        createRequest: { requestId: roomId },
+        createRequest: {
+          requestId: roomId,
+          conferenceSolutionKey: { type: "hangoutsMeet" }, // FIXED
+        },
       },
     };
 
     // Create Google Calendar Event
     const eventResponse = await calendar.events.insert({
-      calendarId: "primary",
+      calendarId: "your-calendar-id@group.calendar.google.com", // FIXED (Replace with your service account Calendar ID)
       resource: event,
-      conferenceDataVersion: 1,
+      conferenceDataVersion: 1, // FIXED
     });
 
     const meetLink = eventResponse.data.hangoutLink;
