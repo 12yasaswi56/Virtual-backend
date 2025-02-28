@@ -845,7 +845,7 @@ app.post("/book-slot", async (req, res) => {
 
     // Create Google Calendar Event
     const eventResponse = await calendar.events.insert({
-      calendarId: "yasaswikopparapu624@gmail.com", // FIXED (Replace with your service account Calendar ID)
+      calendarId: "google-calender@divine-bruin-452312-q6.iam.gserviceaccount.com", // FIXED (Replace with your service account Calendar ID)
       resource: event,
       conferenceDataVersion: 1, // FIXED
     });
