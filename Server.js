@@ -214,24 +214,6 @@ app.get("/startup", async (req, res) => {
   }
 });
 
-// const mentorSchema = new mongoose.Schema({
-//   name: { type: String, required: true, trim: true },
-//   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-//   phone: { type: String, required: true, trim: true },
-//   expertise: { type: String, required: true, trim: true },
-//   experience: { type: Number, required: true },
-//   bio: { type: String, required: true, trim: true },
-//   linkedin: { type: String, trim: true },
-//   resume: { type: String, required: true },
-//   status: { type: String, default: "Pending", enum: ["Pending", "Approved", "Rejected"] },
-//   isAvailable: { type: Boolean, default: false },
-//   appliedAt: { type: Date, default: Date.now },
-// });
-
-
-// // Create the Mentor model based on the schema
-// const Mentor = mongoose.model("Mentor", mentorSchema);
-
 
 
 const mentorSchema = new mongoose.Schema({
@@ -251,72 +233,14 @@ const mentorSchema = new mongoose.Schema({
 
 const Mentor = mongoose.model("Mentor", mentorSchema);
 
-
-// // Mentor Application Route
-// app.post("/mentor-apply", async (req, res) => {
-//   const { name, email, expertise } = req.body;
-
-//   // ✅ Check if all fields are provided
-//   if (!name || !email || !expertise) {
-//     return res.status(400).json({ message: "All fields are required" });
-//   }
-
-//   try {
-//     // ✅ Check if mentor already exists
-//     const existingMentor = await Mentor.findOne({ email });
-//     if (existingMentor) {
-//       return res.status(400).json({ message: "Mentor with this email already exists!" });
-//     }
-
-//     // ✅ Create a new mentor application (status set to "Pending", availability is false)
-//     const newMentor = new Mentor({
-//       name,
-//       email,
-//       expertise,
-//       status: "Pending", // Admin needs to approve
-//       available: false, // Initially not available until approved
-//     });
-
-//     await newMentor.save(); // Save to database
-
-//     // ✅ Send success response
-//     return res.status(200).json({ message: "Application submitted successfully!" });
-//   } catch (err) {
-//     console.error("Error saving mentor application:", err);
-//     return res.status(500).json({ message: "Server error. Try again later." });
-//   }
-// });
-
-
-// app.post("/mentor-apply", async (req, res) => {
-//   try {
-//     const { name, email, phone, expertise, experience, bio, linkedin, resume } = req.body;
-
-//     if (!name || !email || !phone || !expertise || !experience || !bio || !resume) {
-//       return res.status(400).json({ message: "Please fill in all required fields." });
-//     }
-
-//     const existingMentor = await Mentor.findOne({ email });
-//     if (existingMentor) {
-//       return res.status(400).json({ message: "Mentor with this email already applied." });
-//     }
-
-//     const mentor = new Mentor({ name, email, phone, expertise, experience,status : "pending",available : false, bio, linkedin, resume ,});
-//     await mentor.save();
-//     res.status(201).json({ message: "Mentor application submitted successfully!" });
-//   } catch (error) {
-//     res.status(500).json({ message: "Server error. Please try again." });
-//   }
-// });
-// Mentor Application Route
-app.post("/mentor-apply", upload.single("resume"), async (req, res) => {
+app.post("/mentor-apply", async (req, res) => {
   try {
     console.log("Received Mentor Data:", req.body); // Debugging Step
 
-    let { name, email, phone, expertise, experience, bio, linkedin } = req.body;
+    let { name, email, phone, expertise, experience, bio, linkedin, resume } = req.body;
 
-    if (!name || !email || !phone || !expertise || !experience || !bio || !req.file) {
-      return res.status(400).json({ message: "Please fill in all required fields, including resume." });
+    if (!name || !email || !phone || !expertise || !experience || !bio || !resume) {
+      return res.status(400).json({ message: "Please fill in all required fields." });
     }
 
     const existingMentor = await Mentor.findOne({ email });
@@ -324,22 +248,22 @@ app.post("/mentor-apply", upload.single("resume"), async (req, res) => {
       return res.status(400).json({ message: "Mentor with this email already applied." });
     }
 
-    const experienceNumber = Number(experience); // Ensure experience is a valid number
+    const experienceNumber = Number(experience); // Ensure experience is stored as a number
     if (isNaN(experienceNumber)) {
       return res.status(400).json({ message: "Experience must be a valid number." });
     }
 
-    const mentor = new Mentor({
-      name,
-      email,
-      phone,
-      expertise,
-      experience: experienceNumber,
-      status: "Pending",
-      isAvailable: false,
-      bio,
-      linkedin,
-      resume: req.file.path, // Store file path in DB
+    const mentor = new Mentor({ 
+      name, 
+      email, 
+      phone, 
+      expertise, 
+      experience: experienceNumber, 
+      status: "Pending", // Correct capitalization
+      isAvailable: false, // Fix field name
+      bio, 
+      linkedin, 
+      resume 
     });
 
     console.log("Mentor being saved:", mentor); // Debugging Step
@@ -351,49 +275,6 @@ app.post("/mentor-apply", upload.single("resume"), async (req, res) => {
     res.status(500).json({ message: "Server error. Please try again." });
   }
 });
-
-// app.post("/mentor-apply", async (req, res) => {
-//   try {
-//     console.log("Received Mentor Data:", req.body); // Debugging Step
-
-//     let { name, email, phone, expertise, experience, bio, linkedin, resume } = req.body;
-
-//     if (!name || !email || !phone || !expertise || !experience || !bio || !resume) {
-//       return res.status(400).json({ message: "Please fill in all required fields." });
-//     }
-
-//     const existingMentor = await Mentor.findOne({ email });
-//     if (existingMentor) {
-//       return res.status(400).json({ message: "Mentor with this email already applied." });
-//     }
-
-//     const experienceNumber = Number(experience); // Ensure experience is stored as a number
-//     if (isNaN(experienceNumber)) {
-//       return res.status(400).json({ message: "Experience must be a valid number." });
-//     }
-
-//     const mentor = new Mentor({ 
-//       name, 
-//       email, 
-//       phone, 
-//       expertise, 
-//       experience: experienceNumber, 
-//       status: "Pending", // Correct capitalization
-//       isAvailable: false, // Fix field name
-//       bio, 
-//       linkedin, 
-//       resume 
-//     });
-
-//     console.log("Mentor being saved:", mentor); // Debugging Step
-
-//     await mentor.save();
-//     res.status(201).json({ message: "Mentor application submitted successfully!" });
-//   } catch (error) {
-//     console.error("Error saving mentor:", error);
-//     res.status(500).json({ message: "Server error. Please try again." });
-//   }
-// });
 
 
 // Endpoint to fetch all mentor applications (for admin)
@@ -496,188 +377,6 @@ const sendOTPEmail = (email, otp) => {
 };
 
 
-
-
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "https://virtual-frontend-six.vercel.app/",
-    methods: ["GET", "POST"],
-  },
-});
-
-// Handle socket connections
-
-const rooms = {}; // Stores participants in each room
-io.on("connection", (socket) => {
-  console.log("New client connected:", socket.id);
-
-  socket.on("join-room", ({ roomId, email }) => {
-    console.log(`${email} joined room: ${roomId}`);
-
-    if (!rooms[roomId]) {
-      rooms[roomId] = [];
-    }
-
-    rooms[roomId].push({ userId: socket.id, email });
-
-    socket.join(roomId);
-    socket.emit("all-users", rooms[roomId].filter(user => user.userId !== socket.id));
-    
-    socket.to(roomId).emit("user-joined", { userId: socket.id, email });
-  });
-
-  socket.on("sending-signal", ({ userToSignal, callerID, signal }) => {
-    io.to(userToSignal).emit("user-joined", { signal, callerID });
-  });
-
-  socket.on("returning-signal", ({ signal, callerID }) => {
-    io.to(callerID).emit("receiving-returned-signal", { signal, id: socket.id });
-  });
-
-  socket.on("send-message", ({ roomId, message, email }) => {
-    io.to(roomId).emit("receive-message", { message, email });
-  });
-
-  socket.on("hand-raise", ({ roomId, email }) => {
-    io.to(roomId).emit("hand-raised", { email });
-  });
-
-  socket.on("leave-room", ({ roomId, email }) => {
-    console.log(`${email} left room: ${roomId}`);
-    rooms[roomId] = rooms[roomId].filter((user) => user.userId !== socket.id);
-    socket.to(roomId).emit("user-left", { userId: socket.id });
-    socket.leave(roomId);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-    for (const roomId in rooms) {
-      rooms[roomId] = rooms[roomId].filter((user) => user.userId !== socket.id);
-      io.to(roomId).emit("user-left", { userId: socket.id });
-    }
-  });
-});
-
-// io.on("connection", (socket) => {
-//   console.log("New user connected:", socket.id);
-
-//   // Handle user joining a room
-//   socket.on("join-room", ({ roomId, email }) => {
-//     if (!rooms[roomId]) rooms[roomId] = [];
-    
-//     rooms[roomId].push({ userId: socket.id, email });
-    
-//     socket.join(roomId);
-    
-//     // Send the existing users to the new user
-//     socket.emit("all-users", rooms[roomId]);
-
-//     // Notify others in the room
-//     socket.broadcast.to(roomId).emit("user-joined", { userId: socket.id, email });
-
-//     console.log(`User ${email} joined room ${roomId}`);
-//   });
-
-//   // Handle peer signaling
-//   socket.on("sending-signal", ({ userToSignal, callerID, signal }) => {
-//     io.to(userToSignal).emit("receiving-returned-signal", { signal, id: callerID });
-//   });
-
-//   socket.on("returning-signal", ({ signal, callerID }) => {
-//     io.to(callerID).emit("receiving-returned-signal", { signal, id: socket.id });
-//   });
-
-//   // Handle chat messages
-//   socket.on("send-message", ({ roomId, message, email }) => {
-//     io.to(roomId).emit("receive-message", { message, email });
-//   });
-
-//   // Handle hand raise
-//   socket.on("hand-raise", ({ roomId, email }) => {
-//     io.to(roomId).emit("hand-raised", { email });
-//   });
-
-//   // Handle user leaving the room
-//   socket.on("leave-room", ({ roomId, email }) => {
-//     if (rooms[roomId]) {
-//       rooms[roomId] = rooms[roomId].filter((user) => user.userId !== socket.id);
-//       io.to(roomId).emit("user-left", { userId: socket.id });
-//       console.log(`User ${email} left room ${roomId}`);
-//     }
-//     socket.leave(roomId);
-//   });
-
-//   socket.on("disconnect", () => {
-//     console.log("User disconnected:", socket.id);
-//     for (const room in rooms) {
-//       rooms[room] = rooms[room].filter((user) => user.userId !== socket.id);
-//       io.to(room).emit("user-left", { userId: socket.id });
-//     }
-//   });
-// });
-// let users = {};
-
-// io.on("connection", (socket) => {
-//   socket.on("join-room", ({ roomId, userName }) => {
-//     users[socket.id] = { roomId, userName };
-//     socket.join(roomId);
-//     socket.broadcast.to(roomId).emit("user-joined", { userId: socket.id, userName });
-//   });
-
-//   socket.on("offer", ({ target, signal }) => {
-//     io.to(target).emit("offer", { sender: socket.id, signal });
-//   });
-
-//   socket.on("answer", ({ target, signal }) => {
-//     io.to(target).emit("answer", { sender: socket.id, signal });
-//   });
-
-//   socket.on("send-message", ({ roomId, message, userName }) => {
-//     io.to(roomId).emit("receive-message", { message, userName });
-//   });
-
-//   socket.on("hand-raise", ({ roomId, userName }) => {
-//     io.to(roomId).emit("hand-raised", { userName });
-//   });
-
-//   socket.on("disconnect", () => {
-//     const user = users[socket.id];
-//     if (user) {
-//       io.to(user.roomId).emit("user-left", { userId: socket.id, userName: user.userName });
-//       delete users[socket.id];
-//     }
-//   });
-// });
-
-// io.on("connection", (socket) => {
-//   console.log("A user connected:", socket.id);
-
-//   socket.on("joinRoom", ({ userId }) => {
-//     users[userId] = socket.id;
-//     console.log(`User ${userId} joined with socket ID: ${socket.id}`);
-//   });
-
-//   socket.on("sendMessage", ({ senderId, receiverId, message }) => {
-//     console.log(`Message from ${senderId} to ${receiverId}: ${message}`);
-    
-//     // Send message to the receiver
-//     if (users[receiverId]) {
-//       io.to(users[receiverId]).emit("receiveMessage", { senderId, message });
-//     }
-//   });
-
-//   socket.on("disconnect", () => {
-//     console.log("A user disconnected:", socket.id);
-//     Object.keys(users).forEach((userId) => {
-//       if (users[userId] === socket.id) {
-//         delete users[userId];
-//       }
-//     });
-//   });
-// });
-
-
 // 📝 Register Route
 app.post("/register", async (req, res) => {
   const { firstName, lastName, nationality, email, mobile, password } = req.body;
@@ -709,20 +408,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-
-
-// Chat Schema
-const ChatSchema = new mongoose.Schema({
-  sender: String, // User or Mentor
-  receiver: String, // Assigned Mentor
-  message: String,
-  timestamp: { type: Date, default: Date.now },
-});
-
-const Chat = mongoose.model("Chat", ChatSchema);
-
-
-const userSockets = {}; // { userId: socketId }
 
 
 app.post("/assign-mentor", async (req, res) => {
@@ -999,13 +684,87 @@ app.get("/AdminMeetings", async (req, res) => {
 
 
 
-// import { v4 as uuidv4 } from "uuid";
+// // import { v4 as uuidv4 } from "uuid";
+
+// app.post("/book-slot", async (req, res) => {
+//   const { slotId, email } = req.body;
+
+//   console.log("Received Slot ID:", slotId);
+//   console.log("Received Email:", email);
+
+//   if (!slotId || !email) {
+//     return res.status(400).json({ message: "Slot ID and Email are required" });
+//   }
+
+//   try {
+//     const slot = await Slot.findById(slotId);
+
+//     console.log("Slot from DB:", slot);
+
+//     if (!slot) {
+//       return res.status(404).json({ message: "Slot not found" });
+//     }
+
+//     if (slot.isBooked) {
+//       return res.status(400).json({ message: "Slot already booked" });
+//     }
+
+//     // Generate a unique room ID for the meeting
+//     const roomId = uuidv4();  
+
+//     // Update slot booking status
+//     slot.isBooked = true;
+//     slot.bookedBy = email;
+//     slot.roomId = roomId;  
+//     await slot.save();
+
+//     // Send confirmation email with Room ID
+//     const mailOptions = {
+//       from: process.env.EMAIL_USER,
+//       to: email,
+//       subject: "Slot Booking Confirmation ✅",
+//       html: `
+//         <h2>Hello,</h2>
+//         <p>Your interview slot has been <strong>successfully booked!</strong></p>
+//         <p><strong>Date:</strong> ${slot.date}</p>
+//         <p><strong>Time:</strong> ${slot.startTime} - ${slot.endTime}</p>
+//         <p><strong>Room ID:</strong> ${roomId}</p>
+//         <p>You can join the meeting using this <a href="https://virtual-frontend-six.vercel.app/room/${roomId}">Room Link</a> once the interview begins.</p>
+//         <p>One day before your interview, you will receive the meeting link again.</p>
+//         <br/>
+//         <p>Best Regards,</p>
+//         <p><strong>H2Vis Incubators</strong></p>
+//       `,
+//     };
+
+//     try {
+//       await transporter.sendMail(mailOptions);
+//       console.log("Confirmation email sent to:", email);
+//     } catch (emailError) {
+//       console.error("Failed to send confirmation email:", emailError);
+//       return res.status(500).json({ message: "Slot booked, but email failed to send" });
+//     }
+
+//     res.json({ message: "Slot booked successfully! Confirmation email sent." });
+
+//   } catch (error) {
+//     console.error("Error booking slot:", error);
+//     res.status(500).json({ message: "Booking failed" });
+//   }
+// });
+
+
+
+// Google Calendar Authentication
+const auth = new google.auth.GoogleAuth({
+  keyFile: "C:\Users\lenovo\Downloads\Virtual-backend\service-account.json.json", // Update this
+  scopes: ["https://www.googleapis.com/auth/calendar"],
+});
+
+const calendar = google.calendar({ version: "v3", auth });
 
 app.post("/book-slot", async (req, res) => {
   const { slotId, email } = req.body;
-
-  console.log("Received Slot ID:", slotId);
-  console.log("Received Email:", email);
 
   if (!slotId || !email) {
     return res.status(400).json({ message: "Slot ID and Email are required" });
@@ -1013,27 +772,38 @@ app.post("/book-slot", async (req, res) => {
 
   try {
     const slot = await Slot.findById(slotId);
+    if (!slot) return res.status(404).json({ message: "Slot not found" });
+    if (slot.isBooked) return res.status(400).json({ message: "Slot already booked" });
 
-    console.log("Slot from DB:", slot);
+    const roomId = uuidv4();
+    const event = {
+      summary: "H2Vis Incubators Interview",
+      description: `Interview slot booked by ${email}`,
+      start: { dateTime: `${slot.date}T${slot.startTime}:00Z`, timeZone: "Asia/Kolkata" },
+      end: { dateTime: `${slot.date}T${slot.endTime}:00Z`, timeZone: "Asia/Kolkata" },
+      attendees: [{ email }],
+      conferenceData: {
+        createRequest: { requestId: roomId },
+      },
+    };
 
-    if (!slot) {
-      return res.status(404).json({ message: "Slot not found" });
-    }
+    // Create Google Calendar Event
+    const eventResponse = await calendar.events.insert({
+      calendarId: "primary",
+      resource: event,
+      conferenceDataVersion: 1,
+    });
 
-    if (slot.isBooked) {
-      return res.status(400).json({ message: "Slot already booked" });
-    }
+    const meetLink = eventResponse.data.hangoutLink;
+    if (!meetLink) throw new Error("Google Meet link not generated");
 
-    // Generate a unique room ID for the meeting
-    const roomId = uuidv4();  
-
-    // Update slot booking status
     slot.isBooked = true;
     slot.bookedBy = email;
-    slot.roomId = roomId;  
+    slot.roomId = roomId;
+    slot.meetLink = meetLink;
     await slot.save();
 
-    // Send confirmation email with Room ID
+    // Send confirmation email
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
@@ -1043,24 +813,16 @@ app.post("/book-slot", async (req, res) => {
         <p>Your interview slot has been <strong>successfully booked!</strong></p>
         <p><strong>Date:</strong> ${slot.date}</p>
         <p><strong>Time:</strong> ${slot.startTime} - ${slot.endTime}</p>
-        <p><strong>Room ID:</strong> ${roomId}</p>
-        <p>You can join the meeting using this <a href="https://virtual-frontend-six.vercel.app/room/${roomId}">Room Link</a> once the interview begins.</p>
-        <p>One day before your interview, you will receive the meeting link again.</p>
+        <p><strong>Google Meet Link:</strong> <a href="${meetLink}">${meetLink}</a></p>
+        <p>Join the meeting at the scheduled time.</p>
         <br/>
         <p>Best Regards,</p>
         <p><strong>H2Vis Incubators</strong></p>
       `,
     };
 
-    try {
-      await transporter.sendMail(mailOptions);
-      console.log("Confirmation email sent to:", email);
-    } catch (emailError) {
-      console.error("Failed to send confirmation email:", emailError);
-      return res.status(500).json({ message: "Slot booked, but email failed to send" });
-    }
-
-    res.json({ message: "Slot booked successfully! Confirmation email sent." });
+    await transporter.sendMail(mailOptions);
+    res.json({ message: "Slot booked successfully! Google Meet link sent." });
 
   } catch (error) {
     console.error("Error booking slot:", error);
