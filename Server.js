@@ -864,13 +864,17 @@ app.post("/book-slot", async (req, res) => {
     // Generate Google Meet Link
     const googleMeetLink = await createGoogleMeetEvent(email, slot.startTime, slot.endTime);
 
-    // Save slot with Google Meet link
+    // Generate Room ID (assuming you already have a function for this)
+    const roomId = generateRoomId();
+
+    // Save slot with Google Meet link and Room ID
     slot.booked = true;
     slot.meetingLink = googleMeetLink;
+    slot.roomId = roomId;
     await slot.save();
 
-    // Send confirmation email (Include Google Meet link)
-    await sendEmail(email, `Your Interview Link: ${googleMeetLink}`);
+    // Send confirmation email with Google Meet link and Room ID
+    await sendEmail(email, googleMeetLink, roomId);
 
     res.json({ message: "Slot booked successfully! Google Meet link sent.", link: googleMeetLink });
   } catch (error) {
@@ -878,6 +882,21 @@ app.post("/book-slot", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
+const sendEmail = async (to, meetLink, roomId) => {
+  const mailOptions = {
+    from: "your-email@gmail.com",
+    to,
+    subject: "Interview Slot Confirmation",
+    html: `<p>Your interview slot has been booked successfully!</p>
+           <p>🔗 Google Meet Link: <a href="${meetLink}">${meetLink}</a></p>
+           <p>🖥️ Room ID: ${roomId}</p>`,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
 
 // 🚀 Start Server
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
