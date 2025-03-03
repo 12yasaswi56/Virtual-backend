@@ -1,6 +1,11 @@
 import express from "express";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import axios from "axios";
+import { google } from "googleapis";
+import { fileURLToPath } from "url";
+import fs from "fs";
+import moment from "moment-timezone"
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import nodemailer from "nodemailer";
@@ -17,7 +22,8 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // const corsOptions = {
 //   origin: "https://virtual-frontend-six.vercel.app", // Only allow your frontend
@@ -114,17 +120,27 @@ const User = mongoose.model("User", userSchema);
 
 
 
-const slotSchema = new mongoose.Schema({
-  date: { type: String, required: true },
-  startTime: { type: String, required: true },
+
+// const slotSchema = new mongoose.Schema({
+//   date: { type: Date, required: true }, // 🟢 Use Date type instead of String
+//   startTime: { type: Date, required: true }, // 🟢 Store as Date for better queries
+//   endTime: { type: Date, required: true },
+//   isBooked: { type: Boolean, default: false, index: true }, // 🟢 Index for fast lookups
+//   bookedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null }, // 🟢 Reference User
+//   roomId: { type: String, default: null },
+//   meetingLink: { type: String, default: null }, // 🟢 Store Google Meet link
+// });
+
+const SlotSchema = new mongoose.Schema({
+  date: { type: Date, required: true },
+  startTime: { type: String, required: true }, // Keep as String if stored in HH:mm
   endTime: { type: String, required: true },
   isBooked: { type: Boolean, default: false },
-  bookedBy: { type: String, default: null },
-  roomId: { type: String, default: null }, // ✅ Ensure this exists
+  bookedBy: { type: String, default: null }, // ✅ Changed from ObjectId to String
+  meetingLink: { type: String, default: null }
 });
+const Slot = mongoose.model("Slot", SlotSchema);
 
-
-const Slot = mongoose.model("Slot", slotSchema);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -427,26 +443,7 @@ app.post("/assign-mentor", async (req, res) => {
 });
 
 
-app.get("/chats", async (req, res) => {
-  try {
-    const { sender, receiver } = req.query;
-    
-    if (!sender) return res.status(400).json({ message: "Sender parameter is missing" });
-    if (!receiver) return res.status(400).json({ message: "Receiver parameter is missing" });
 
-    const messages = await Chat.find({ 
-      $or: [
-        { sender, receiver },
-        { sender: receiver, receiver: sender }
-      ]
-    }).sort({ timestamp: 1 });
-
-    return res.status(200).json(messages);
-  } catch (error) {
-    console.error("Error fetching chats:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
 
 // 🔹 OTP Verification Route
 app.post("/verify-otp", async (req, res) => {
@@ -554,35 +551,42 @@ app.post("/Resetpassword", async (req, res) => {
 });
 
 
+
 app.get("/slots", async (req, res) => {
   try {
-      const currentDate = moment().format("YYYY-MM-DD");
-      const currentTime = moment().format("HH:mm");
+      const currentDate = moment().startOf("day").toDate(); // Convert to Date object
+      const currentTime = moment().toDate(); // Get current time as Date object
 
       const availableSlots = await Slot.find({
           isBooked: false,
           $or: [
               { date: { $gt: currentDate } }, // Future dates
-              { date: currentDate, endTime: { $gt: currentTime } } // Today’s slots that haven't ended
+              { date: currentDate, endTime: { $gt: currentTime } } // Today's remaining slots
           ],
       });
 
       // ✅ If no slots exist, generate slots for the next 7 days
       if (availableSlots.length === 0) {
-          const timeSlots = ["10:00", "11:30", "14:00", "15:30"]; // Define available time slots
+          const timeSlots = ["10:00", "11:30", "14:00", "15:30"];
           const slotsToInsert = [];
 
           for (let i = 0; i < 7; i++) {
-              const date = moment().add(i, "days").format("YYYY-MM-DD");
+              const date = moment().add(i, "days").startOf("day").toDate();
 
-              for (const startTime of timeSlots) {
-                  const endTime = moment(startTime, "HH:mm").add(1, "hour").format("HH:mm");
+              for (const time of timeSlots) {
+                  const startTime = moment(date).set({ 
+                      hour: parseInt(time.split(":")[0]), 
+                      minute: parseInt(time.split(":")[1])
+                  }).toDate();
+
+                  const endTime = moment(startTime).add(1, "hour").toDate();
+
                   slotsToInsert.push({ date, startTime, endTime, isBooked: false });
               }
           }
 
           await Slot.insertMany(slotsToInsert);
-          return res.json(slotsToInsert); // Return newly inserted slots
+          return res.json(slotsToInsert);
       }
 
       res.json(availableSlots);
@@ -602,7 +606,8 @@ const transporter = nodemailer.createTransport({
 
 
 
-import moment from 'moment' ;// Import moment.js for date comparison
+// import moment from 'moment' ;// Import moment.js for date comparison
+
 
 app.get("/AdminMeetings", async (req, res) => {
   try {
@@ -616,7 +621,7 @@ app.get("/AdminMeetings", async (req, res) => {
           endTime: { $gte: currentDateTime.format("HH:mm") }
         }
       ]
-    }).select("date startTime endTime bookedBy roomId"); // ✅ Use startTime instead of time
+    }).select("date startTime endTime bookedBy meetingLink"); // ✅ Use startTime instead of time
 
     res.json(meetings);
   } catch (error) {
@@ -626,95 +631,133 @@ app.get("/AdminMeetings", async (req, res) => {
 });
 
 
-
-
  import { v4 as uuidv4 } from "uuid"; // Correct import syntax
 
 
-
- import { google } from "googleapis";
-
-
-const createGoogleMeetEvent = async (email, startTime, endTime) => {
+ // Generate Zoom Access Token
+// ✅ Generate Zoom Access Token
+const getZoomAccessToken = async () => {
   try {
-    const auth = new google.auth.GoogleAuth({
-      keyFile: "C:/Users/lenovo/Downloads/Virtual-backend/service-account.json", // Your Google Service Account JSON
-      scopes: ["https://www.googleapis.com/auth/calendar"],
+    const response = await axios.post("https://zoom.us/oauth/token", null, {
+      params: {
+        grant_type: "account_credentials",
+        account_id: process.env.ZOOM_ACCOUNT_ID,
+      },
+      headers: {
+        Authorization: `Basic ${Buffer.from(
+          `${process.env.ZOOM_CLIENT_ID}:${process.env.ZOOM_CLIENT_SECRET}`
+        ).toString("base64")}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
     });
+    return response.data.access_token;
+  } catch (error) {
+    console.error("❌ Error fetching Zoom access token:", error.response?.data || error.message);
+    throw new Error("Failed to get Zoom token");
+  }
+};
 
-    const calendar = google.calendar({ version: "v3", auth });
-
-    const event = {
-      summary: "Virtual Interview",
-      start: { dateTime: startTime, timeZone: "Asia/Kolkata" },
-      end: { dateTime: endTime, timeZone: "Asia/Kolkata" },
-      attendees: [{ email }],
-      conferenceData: {
-        createRequest: {
-          requestId: Math.random().toString(36).substring(7), // Unique ID
-          conferenceSolutionKey: { type: "hangoutsMeet" },
+// ✅ Create a Zoom Meeting
+const createZoomMeeting = async (userEmail) => {
+  try {
+    const token = await getZoomAccessToken();
+    const response = await axios.post(
+      "https://api.zoom.us/v2/users/me/meetings",
+      {
+        topic: "Scheduled Meeting",
+        type: 2,
+        start_time: new Date().toISOString(),
+        duration: 30,
+        timezone: "UTC",
+        agenda: "Mentor session",
+        settings: {
+          host_video: true,
+          participant_video: true,
+          join_before_host: false,
+          mute_upon_entry: true,
+          approval_type: 0, // No manual approval needed
         },
       },
-    };
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const response = await calendar.events.insert({
-      calendarId: "google-calender@divine-bruin-452312-q6.iam.gserviceaccount.com",
-      resource: event,
-      conferenceDataVersion: 1, // Required for Meet links
+    return response.data.join_url;
+  } catch (error) {
+    console.error("❌ Error creating Zoom meeting:", error.response?.data || error.message);
+    throw new Error("Failed to create Zoom meeting");
+  }
+};
+
+// ✅ Send Email with Zoom Link
+const sendConfirmationEmail = async (userEmail, zoomLink) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
     });
 
-    return response.data.hangoutLink; // Returns Google Meet link
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: userEmail,
+      subject: "Your Scheduled Zoom Meeting",
+      text: `Hello,\n\nYour meeting is scheduled. Join here: ${zoomLink}\n\nThank you!`,
+    };
+
+    await transporter.sendMail(mailOptions);
   } catch (error) {
-    console.error("Error creating Google Meet event:", error);
-    return null;
+    console.error("❌ Error sending email:", error.response?.data || error.message);
+    throw new Error("Failed to send email");
   }
 };
 
 
 app.post("/book-slot", async (req, res) => {
-  const { slotId, email } = req.body;
+  const { slotId, userEmail } = req.body;
 
   try {
+    // Fetch the slot
     const slot = await Slot.findById(slotId);
-    if (!slot) return res.status(404).json({ message: "Slot not found" });
+    if (!slot || slot.isBooked) {
+      return res.status(400).json({ message: "Slot not available" });
+    }
 
-    if (slot.booked) return res.status(400).json({ message: "Slot already booked" });
+    // Convert startTime & endTime correctly
+    const slotDate = slot.date.toISOString().split("T")[0]; // Extract date in YYYY-MM-DD format
+    const startTimeFormatted = moment(`${slotDate} ${slot.startTime}`, "YYYY-MM-DD HH:mm").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+    const endTimeFormatted = moment(`${slotDate} ${slot.endTime}`, "YYYY-MM-DD HH:mm").format("YYYY-MM-DDTHH:mm:ss.SSS[Z]");
 
-    // Generate Google Meet Link
-    const googleMeetLink = await createGoogleMeetEvent(email, slot.startTime, slot.endTime);
+    // Create Zoom meeting link
+    const zoomLink = await createZoomMeeting(userEmail);
 
-    // Generate Room ID (assuming you already have a function for this)
-    const roomId = generateRoomId();
-
-    // Save slot with Google Meet link and Room ID
-    slot.booked = true;
-    slot.meetingLink = googleMeetLink;
-    slot.roomId = roomId;
+    // Update the slot
+    slot.isBooked = true;
+    slot.bookedBy = userEmail; // ✅ Store as string
+    slot.startTime = new Date(startTimeFormatted); // ✅ Convert to Date
+    slot.endTime = new Date(endTimeFormatted); // ✅ Convert to Date
+    slot.meetingLink = zoomLink;
     await slot.save();
 
-    // Send confirmation email with Google Meet link and Room ID
-    await sendEmail(email, googleMeetLink, roomId);
+    // Send confirmation email
+    await sendConfirmationEmail(userEmail, zoomLink);
 
-    res.json({ message: "Slot booked successfully! Google Meet link sent.", link: googleMeetLink });
+    res.json({ message: "Slot booked successfully!", zoomLink });
   } catch (error) {
-    console.error("Error booking slot:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("❌ Error booking slot:", error);
+    res.status(500).json({ message: "Error booking slot", error: error.message });
   }
 });
 
 
-const sendEmail = async (to, meetLink, roomId) => {
-  const mailOptions = {
-    from: "your-email@gmail.com",
-    to,
-    subject: "Interview Slot Confirmation",
-    html: `<p>Your interview slot has been booked successfully!</p>
-           <p>🔗 Google Meet Link: <a href="${meetLink}">${meetLink}</a></p>
-           <p>🖥️ Room ID: ${roomId}</p>`,
-  };
 
-  await transporter.sendMail(mailOptions);
-};
+
 
 
 // 🚀 Start Server
