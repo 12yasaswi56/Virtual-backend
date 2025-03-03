@@ -120,17 +120,6 @@ const User = mongoose.model("User", userSchema);
 
 
 
-
-// const slotSchema = new mongoose.Schema({
-//   date: { type: Date, required: true }, // 🟢 Use Date type instead of String
-//   startTime: { type: Date, required: true }, // 🟢 Store as Date for better queries
-//   endTime: { type: Date, required: true },
-//   isBooked: { type: Boolean, default: false, index: true }, // 🟢 Index for fast lookups
-//   bookedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null }, // 🟢 Reference User
-//   roomId: { type: String, default: null },
-//   meetingLink: { type: String, default: null }, // 🟢 Store Google Meet link
-// });
-
 const SlotSchema = new mongoose.Schema({
   date: { type: Date, required: true },
   startTime: { type: String, required: true }, // Keep as String if stored in HH:mm
