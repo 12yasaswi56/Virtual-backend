@@ -180,15 +180,27 @@ app.post('/contact', upload.single('file'), (req, res) => {
 
 
 
-//schema for startUp
+// //schema for startUp
+// const startupSchema = new mongoose.Schema({
+//   startupName: String,
+//   founderName: String,
+//   email: String,
+//   phone: String,
+//   industry: String,
+//   description: String,
+// });
+
 const startupSchema = new mongoose.Schema({
-  startupName: String,
-  founderName: String,
-  email: String,
-  phone: String,
-  industry: String,
-  description: String,
-});
+  startupName: { type: String, required: true },
+  founderName: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  phone: { type: String, required: true },
+  industry: { type: String, required: true },
+  description: { type: String, required: true },
+  stage: { type: String, required: true },
+  personalNote: { type: String },
+  pptFile: { type: String }, // Store file path or URL
+}, { timestamps: true });
 
 const Startup = mongoose.model("Startup", startupSchema);
 
@@ -196,14 +208,39 @@ const Startup = mongoose.model("Startup", startupSchema);
 
 
 // API Routes
-app.post("/startup", async (req, res) => {
+// app.post("/startup", async (req, res) => {
+//   try {
+//     const newStartup = new Startup(req.body);
+//     await newStartup.save();
+//     res.status(201).json({ message: "Startup application submitted successfully!" });
+//   } catch (error) {
+//     console.error("Error saving startup:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
+
+app.post("/startup", upload.single("pptFile"), async (req, res) => {
   try {
-    const newStartup = new Startup(req.body);
+    const { startupName, founderName, email, phone, industry, description, stage, personalNote } = req.body;
+    const pptFile = req.file ? req.file.path : null; // Store file path
+
+    const newStartup = new Startup({
+      startupName,
+      founderName,
+      email,
+      phone,
+      industry,
+      description,
+      stage,
+      personalNote,
+      pptFile
+    });
+
     await newStartup.save();
-    res.status(201).json({ message: "Startup application submitted successfully!" });
+    res.status(201).json({ message: "Application submitted successfully!" });
   } catch (error) {
-    console.error("Error saving startup:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error submitting application:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
