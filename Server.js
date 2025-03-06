@@ -646,13 +646,13 @@ app.get("/AdminMeetings", async (req, res) => {
           endTime: { $gte: currentDateTime.format("HH:mm") }  // ✅ Fix: Ensure stored format matches
         }
       ]
-    }).select("date startTime endTime bookedBy meetingLink");
+    }).select("date startTime bookedBy meetingLink");
 
     // ✅ Convert `startTime` and `endTime` to HH:mm before sending response
     const formattedMeetings = meetings.map(meeting => ({
       ...meeting._doc,
       startTime: moment(meeting.startTime).format("HH:mm"),
-      endTime: moment(meeting.endTime).format("HH:mm"),
+      // endTime: moment(meeting.endTime).format("HH:mm"),
     }));
 
     res.json(formattedMeetings);
