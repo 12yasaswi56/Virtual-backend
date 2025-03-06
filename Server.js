@@ -634,7 +634,6 @@ const transporter = nodemailer.createTransport({
 
 // import moment from 'moment' ;// Import moment.js for date comparison
 
-
 app.get("/AdminMeetings", async (req, res) => {
   try {
     const currentDateTime = moment();
@@ -644,17 +643,44 @@ app.get("/AdminMeetings", async (req, res) => {
         { date: { $gt: currentDateTime.format("YYYY-MM-DD") } },
         { 
           date: currentDateTime.format("YYYY-MM-DD"),
-          endTime: { $gte: currentDateTime.format("HH:mm") }
+          endTime: { $gte: currentDateTime.format("HH:mm") }  // ✅ Fix: Ensure stored format matches
         }
       ]
-    }).select("date startTime endTime bookedBy meetingLink"); // ✅ Use startTime instead of time
+    }).select("date startTime endTime bookedBy meetingLink");
 
-    res.json(meetings);
+    // ✅ Convert `startTime` and `endTime` to HH:mm before sending response
+    const formattedMeetings = meetings.map(meeting => ({
+      ...meeting._doc,
+      startTime: moment(meeting.startTime).format("HH:mm"),
+      endTime: moment(meeting.endTime).format("HH:mm"),
+    }));
+
+    res.json(formattedMeetings);
   } catch (error) {
     console.error("Error fetching meetings:", error);
     res.status(500).json({ message: "Failed to fetch meetings" });
   }
 });
+// app.get("/AdminMeetings", async (req, res) => {
+//   try {
+//     const currentDateTime = moment();
+//     const meetings = await Slot.find({
+//       isBooked: true,
+//       $or: [
+//         { date: { $gt: currentDateTime.format("YYYY-MM-DD") } },
+//         { 
+//           date: currentDateTime.format("YYYY-MM-DD"),
+//           endTime: { $gte: currentDateTime.format("HH:mm") }
+//         }
+//       ]
+//     }).select("date startTime endTime bookedBy meetingLink"); // ✅ Use startTime instead of time
+
+//     res.json(meetings);
+//   } catch (error) {
+//     console.error("Error fetching meetings:", error);
+//     res.status(500).json({ message: "Failed to fetch meetings" });
+//   }
+// });
 
 
  import { v4 as uuidv4 } from "uuid"; // Correct import syntax
