@@ -26,7 +26,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // const corsOptions = {
-//   origin: "https://virtual-frontend-six.vercel.app", // Only allow your frontend
+//   origin: "https://preprint-frontend.vercel.app", // Only allow your frontend
 //   methods: ["GET", "POST","PUT"], // Restrict to only necessary methods
 //   allowedHeaders: ["Content-Type", "Authorization"], // Only allow specific headers
 //   credentials: true, // Allow cookies if needed
@@ -528,7 +528,7 @@ app.post("/forgot-password", async (req, res) => {
       },
     });
 
-    const resetLink = `https://virtual-frontend-six.vercel.app/Resetpassword?token=${token}`;
+    const resetLink = `https://preprint-frontend.vercel.app/Resetpassword?token=${token}`;
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
