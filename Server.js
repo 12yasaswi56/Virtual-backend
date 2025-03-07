@@ -4,7 +4,6 @@ import bcrypt from "bcryptjs";
 import axios from "axios";
 import { google } from "googleapis";
 import { fileURLToPath } from "url";
-import fs from "fs";
 import moment from "moment-timezone"
 import jwt from "jsonwebtoken";
 import multer from "multer";
@@ -13,8 +12,6 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import cors from "cors";
 import { OAuth2Client } from "google-auth-library";
-import http from "http";
-import { Server } from "socket.io";
 import path from "path";
 dotenv.config();
 
@@ -204,20 +201,6 @@ const startupSchema = new mongoose.Schema({
 
 const Startup = mongoose.model("Startup", startupSchema);
 
-
-
-
-// API Routes
-// app.post("/startup", async (req, res) => {
-//   try {
-//     const newStartup = new Startup(req.body);
-//     await newStartup.save();
-//     res.status(201).json({ message: "Startup application submitted successfully!" });
-//   } catch (error) {
-//     console.error("Error saving startup:", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
 
 app.post("/startup", upload.single("pptFile"), async (req, res) => {
   try {
