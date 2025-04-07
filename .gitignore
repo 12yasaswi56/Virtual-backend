@@ -1,8 +1,15 @@
 # Node modules (these are reinstalled with package.json)
 node_modules/
 
+# Yarn/NPM lock files
+package-lock.json
+
+# Yarn cache (optional)
+.yarn/cache/
+
 # Environment variables (contains secrets)
 .env
+.env.*
 
 # Logs
 logs/

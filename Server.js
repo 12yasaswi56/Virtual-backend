@@ -14,7 +14,7 @@ import cors from "cors";
 import { OAuth2Client } from "google-auth-library";
 import path from "path";
 dotenv.config();
-const helmet = require('helmet');
+import helmet from 'helmet';
 
 const app = express();
 app.use(express.json());
@@ -35,7 +35,7 @@ const __dirname = path.dirname(__filename);
 // app.use(cors(corsOptions));
 
 
-// const helmet = require("helmet");
+// cimport helmet from "helmet";onst helmet = require("helmet");
 
 // app.use(
 //   helmet({
