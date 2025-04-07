@@ -1,0 +1,23 @@
+# Node modules (these are reinstalled with package.json)
+node_modules/
+
+# Environment variables (contains secrets)
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Build / temp files
+dist/
+build/
+.cache/
+.tmp/
+
+# VSCode settings (optional)
+.vscode/

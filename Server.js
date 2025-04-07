@@ -14,10 +14,12 @@ import cors from "cors";
 import { OAuth2Client } from "google-auth-library";
 import path from "path";
 dotenv.config();
+const helmet = require('helmet');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(helmet());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -90,7 +92,8 @@ app.get("/", (req, res) => {
 
 // 📌 Connect to MongoDB
 mongoose
-  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true ,ssl: true,
+    sslValidate: true })
   .then(() => console.log("✅ MongoDB Atlas Connected Successfully"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
