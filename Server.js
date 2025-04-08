@@ -24,15 +24,15 @@ app.use(helmet());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// const corsOptions = {
-//   origin: "https://preprint-frontend.vercel.app", // Only allow your frontend
-//   methods: ["GET", "POST","PUT"], // Restrict to only necessary methods
-//   allowedHeaders: ["Content-Type", "Authorization"], // Only allow specific headers
-//   credentials: true, // Allow cookies if needed
-//   optionsSuccessStatus: 204 // Handle preflight requests efficiently
-// };
+const corsOptions = {
+  origin: "https://yasaswi-v-frontend-1g3b.vercel.app/", // Only allow your frontend
+  methods: ["GET", "POST","PUT"], // Restrict to only necessary methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Only allow specific headers
+  credentials: true, // Allow cookies if needed
+  optionsSuccessStatus: 204 // Handle preflight requests efficiently
+};
 
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
 
 // cimport helmet from "helmet";onst helmet = require("helmet");
