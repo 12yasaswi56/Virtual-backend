@@ -24,13 +24,23 @@ app.use(helmet());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// const corsOptions = {
+//   origin: "https://yasaswi-v-frontend-1g3b.vercel.app/", // Only allow your frontend
+//   methods: ["GET", "POST","PUT"], // Restrict to only necessary methods
+//   allowedHeaders: ["Content-Type", "Authorization"], // Only allow specific headers
+//   credentials: true, // Allow cookies if needed
+//   optionsSuccessStatus: 204 // Handle preflight requests efficiently
+// };
+
 const corsOptions = {
-  origin: "https://yasaswi-v-frontend-1g3b.vercel.app/", // Only allow your frontend
-  methods: ["GET", "POST","PUT"], // Restrict to only necessary methods
-  allowedHeaders: ["Content-Type", "Authorization"], // Only allow specific headers
-  credentials: true, // Allow cookies if needed
-  optionsSuccessStatus: 204 // Handle preflight requests efficiently
+  origin: "https://yasaswi-v-frontend-1g3b.vercel.app", // ✅ No trailing slash!
+  methods: ["GET", "POST", "PUT", "DELETE"], // Add DELETE if needed
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  optionsSuccessStatus: 204
 };
+
+
 
 app.use(cors(corsOptions));
 
