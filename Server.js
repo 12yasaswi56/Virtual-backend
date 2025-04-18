@@ -1,6 +1,10 @@
 import express from "express";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import User from './models/User.js';
+import Slot from "./models/Slot.js";
+import Startup from "./models/Startup.js";
+import Mentor from "./models/Mentor.js";
 import axios from "axios";
 import { google } from "googleapis";
 import { fileURLToPath } from "url";
@@ -108,36 +112,38 @@ mongoose
 
 
 
-const userSchema = new mongoose.Schema({
-  firstName: String,
-  lastName: String,
-  nationality: String,
-  email: { type: String, unique: true, required: true },
-  mobile: String,
-  password: String,
-  otp: String,
-  otpExpires: Date, // ✅ OTP expiration time
-  isVerified: { type: Boolean, default: false },
-
-  // Password Reset Fields
-  passwordResetToken: String,  // ✅ Stores the last used reset token
-  passwordResetExpires: Date,  // ✅ Expiration time for reset token
-});
 
 
-const User = mongoose.model("User", userSchema);
+// const userSchema = new mongoose.Schema({
+//   firstName: String,
+//   lastName: String,
+//   nationality: String,
+//   email: { type: String, unique: true, required: true },
+//   mobile: String,
+//   password: String,
+//   otp: String,
+//   otpExpires: Date, // ✅ OTP expiration time
+//   isVerified: { type: Boolean, default: false },
+
+//   // Password Reset Fields
+//   passwordResetToken: String,  // ✅ Stores the last used reset token
+//   passwordResetExpires: Date,  // ✅ Expiration time for reset token
+// });
+
+
+// const User = mongoose.model("User", userSchema);
 
 
 
-const SlotSchema = new mongoose.Schema({
-  date: { type: Date, required: true },
-  startTime: { type: String, required: true }, // Keep as String if stored in HH:mm
-  endTime: { type: String, required: true },
-  isBooked: { type: Boolean, default: false },
-  bookedBy: { type: String, default: null }, // ✅ Changed from ObjectId to String
-  meetingLink: { type: String, default: null }
-});
-const Slot = mongoose.model("Slot", SlotSchema);
+// const SlotSchema = new mongoose.Schema({
+//   date: { type: Date, required: true },
+//   startTime: { type: String, required: true }, // Keep as String if stored in HH:mm
+//   endTime: { type: String, required: true },
+//   isBooked: { type: Boolean, default: false },
+//   bookedBy: { type: String, default: null }, // ✅ Changed from ObjectId to String
+//   meetingLink: { type: String, default: null }
+// });
+// const Slot = mongoose.model("Slot", SlotSchema);
 
 
 app.use(bodyParser.json());
@@ -199,19 +205,19 @@ app.post('/contact', upload.single('file'), (req, res) => {
 //   description: String,
 // });
 
-const startupSchema = new mongoose.Schema({
-  startupName: { type: String, required: true },
-  founderName: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  phone: { type: String, required: true },
-  industry: { type: String, required: true },
-  description: { type: String, required: true },
-  stage: { type: String, required: true },
-  personalNote: { type: String },
-  pptFile: { type: String }, // Store file path or URL
-}, { timestamps: true });
+// const startupSchema = new mongoose.Schema({
+//   startupName: { type: String, required: true },
+//   founderName: { type: String, required: true },
+//   email: { type: String, required: true, unique: true },
+//   phone: { type: String, required: true },
+//   industry: { type: String, required: true },
+//   description: { type: String, required: true },
+//   stage: { type: String, required: true },
+//   personalNote: { type: String },
+//   pptFile: { type: String }, // Store file path or URL
+// }, { timestamps: true });
 
-const Startup = mongoose.model("Startup", startupSchema);
+// const Startup = mongoose.model("Startup", startupSchema);
 
 
 app.post("/startup", upload.single("pptFile"), async (req, res) => {
@@ -251,21 +257,21 @@ app.get("/startup", async (req, res) => {
 
 
 
-const mentorSchema = new mongoose.Schema({
-  name: { type: String, required: true, trim: true },
-  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  phone: { type: String, required: true, trim: true },
-  expertise: { type: String, required: true, trim: true },
-  experience: { type: Number, required: true },
-  bio: { type: String, required: true, trim: true },
-  linkedin: { type: String, trim: true },
-  resume: { type: String, required: true },
-  status: { type: String, default: "Pending", enum: ["Pending", "Approved", "Rejected"] },
-  isAvailable: { type: Boolean, default: false },
-  appliedAt: { type: Date, default: Date.now },
-});
+// const mentorSchema = new mongoose.Schema({
+//   name: { type: String, required: true, trim: true },
+//   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+//   phone: { type: String, required: true, trim: true },
+//   expertise: { type: String, required: true, trim: true },
+//   experience: { type: Number, required: true },
+//   bio: { type: String, required: true, trim: true },
+//   linkedin: { type: String, trim: true },
+//   resume: { type: String, required: true },
+//   status: { type: String, default: "Pending", enum: ["Pending", "Approved", "Rejected"] },
+//   isAvailable: { type: Boolean, default: false },
+//   appliedAt: { type: Date, default: Date.now },
+// });
 
-const Mentor = mongoose.model("Mentor", mentorSchema);
+// const Mentor = mongoose.model("Mentor", mentorSchema);
 
 app.post("/mentor-apply", async (req, res) => {
   try {
@@ -656,26 +662,7 @@ app.get("/AdminMeetings", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch meetings" });
   }
 });
-// app.get("/AdminMeetings", async (req, res) => {
-//   try {
-//     const currentDateTime = moment();
-//     const meetings = await Slot.find({
-//       isBooked: true,
-//       $or: [
-//         { date: { $gt: currentDateTime.format("YYYY-MM-DD") } },
-//         { 
-//           date: currentDateTime.format("YYYY-MM-DD"),
-//           endTime: { $gte: currentDateTime.format("HH:mm") }
-//         }
-//       ]
-//     }).select("date startTime endTime bookedBy meetingLink"); // ✅ Use startTime instead of time
 
-//     res.json(meetings);
-//   } catch (error) {
-//     console.error("Error fetching meetings:", error);
-//     res.status(500).json({ message: "Failed to fetch meetings" });
-//   }
-// });
 
 
  import { v4 as uuidv4 } from "uuid"; // Correct import syntax
