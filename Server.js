@@ -529,7 +529,7 @@ app.post("/forgot-password", async (req, res) => {
       },
     });
 
-    const resetLink = `https://preprint-frontend.vercel.app/Resetpassword?token=${token}`;
+    const resetLink = `https://yasaswi-v-frontend-1g3b.vercel.app/Resetpassword?token=${token}`;
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
