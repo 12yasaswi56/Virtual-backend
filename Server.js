@@ -37,7 +37,7 @@ const __dirname = path.dirname(__filename);
 // };
 
 const corsOptions = {
-  origin: "https://yasaswi-v-frontend-1g3b.vercel.app", // ✅ No trailing slash!
+  origin: ["https://yasaswi-v-frontend-1g3b.vercel.app","http://localhost:5173"], // ✅ No trailing slash!
   methods: ["GET", "POST", "PUT", "DELETE"], // Add DELETE if needed
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
